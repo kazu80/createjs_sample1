@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample 4</title>
+    <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+    <script>
+        window.addEventListener ('load', init);
+
+        function init () {
+            const stage = new createjs.Stage ('myCanvas');
+
+            const shape = new createjs.Shape ();
+
+            shape.graphics.beginFill ('DarkRed');
+            shape.graphics.drawRect (0, 0, 200, 100);
+
+            stage.addChild (shape);
+
+            shape.graphics.drawRoundRect (0, 110, 100, 100, 20, 20);
+
+            stage.addChild (shape);
+
+            // Graphicsオブジェクト.drawPolyStar(x座標, y座標, 半径, 頂点数, 谷の深さ, 起点角)
+            shape.graphics.drawPolyStar (75, 295, 75, 5, 0.6, -90); // 75pxの星を記述
+
+            stage.addChild (shape);
+
+            //
+            shape.graphics.moveTo (0, 400); // (0,0)座標から描き始める
+            shape.graphics.lineTo (100, 400); // (100,0)座標まで辺を描く
+            shape.graphics.lineTo (0, 500); // (0,100)座標まで辺を描く
+            shape.graphics.lineTo (0, 400); // (0,0)座標まで辺を描く
+
+            stage.addChild (shape);
+
+            stage.update ();
+        }
+    </script>
+</head>
+<body>
+<canvas id="myCanvas" width="640" height="640"></canvas>
+</body>
+</html>
