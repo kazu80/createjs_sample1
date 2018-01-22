@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>sample_2</title>
+
+    <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+    <script>
+        window.addEventListener('load', init);
+
+        function init () {
+
+            console.log('foo');
+
+            const stage = new createjs.Stage('myCanvas');
+
+            const object = new createjs.Shape();
+            object.graphics.beginFill('DarkRed');
+            object.graphics.drawCircle(0, 0, 100);
+
+            object.x = 100;
+            object.y = 100;
+
+            object.alpha = 0.5;
+
+            object.visible = true;
+
+            object.scaleX = 0.5;
+            object.scakeY = 2.0;
+
+            stage.addChild(object);
+
+            stage.update();
+        }
+    </script>
+</head>
+
+<body>
+<canvas id="myCanvas" width="640" height="320"></canvas>
+</body>
+</html>
