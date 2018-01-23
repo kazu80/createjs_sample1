@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample 8</title>
+    <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+    <script>
+        window.addEventListener ('load', init);
+
+        function init () {
+            const stage = new createjs.Stage ('myCanvas');
+
+            // コンテナ
+            const container = new createjs.Container ();
+            container.x = 300;
+            container.y = 300;
+            stage.addChild (container);
+
+            // Loop
+            for (let i = 0; i < 10; i++) {
+                // 円を作成し
+                const ball = new createjs.Shape ();
+                ball.graphics
+                    .beginFill ('DarkRed')
+                    .drawCircle (0, 0, 50);
+
+                // 円周上に配置
+                ball.x = 200 * Math.sin (i * 360 / 10 * Math.PI / 180);
+                ball.y = 200 * Math.cos (i * 360 / 10 * Math.PI / 180);
+
+                container.addChild (ball);
+            }
+
+            createjs.Ticker.addEventListener ('tick', handleTick);
+
+            function handleTick () {
+                container.rotation += 1;
+                stage.update ();
+            }
+        }
+    </script>
+</head>
+<body>
+<canvas id="myCanvas" width="960" height="540"></canvas>
+</body>
+</html>
