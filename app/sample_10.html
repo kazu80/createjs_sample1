@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample 10</title>
+    <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+    <script>
+        window.addEventListener ('load', init);
+
+        function init () {
+            const stage = new createjs.Stage ('myCanvas');
+
+            // 円を作成します
+            const shape = new createjs.Shape ();
+            shape.graphics.beginFill ('DarkRed').drawCircle (0, 0, 100);
+            shape.y = 150;
+            stage.addChild (shape);
+
+            // createjs.Ticker.setFPS(60);
+            createjs.Ticker.timingMode = createjs.Ticker.RAF;
+
+            createjs.Ticker.addEventListener ('tick', stage);
+
+            createjs.Ticker.addEventListener ('tick', handleTick);
+
+            function handleTick () {
+                shape.x += 2;
+            }
+        }
+    </script>
+</head>
+<body>
+<canvas id="myCanvas" width="960" height="540"></canvas>
+</body>
+</html>
