@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample 6</title>
+    <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+    <script>
+        window.addEventListener ('load', init);
+
+        function init () {
+            const stage = new createjs.Stage ('myCanvas');
+
+            const bmp = new createjs.Bitmap ('images/image_sample.jpg');
+
+            stage.addChild (bmp);
+
+            bmp.x = 300;
+            bmp.y = 300;
+
+            bmp.regX = 300;
+            bmp.regY = 300;
+
+            bmp.rotation = 90;
+
+            stage.update ();
+        }
+    </script>
+</head>
+<body>
+<canvas id="myCanvas" width="640" height="640"></canvas>
+</body>
+</html>
