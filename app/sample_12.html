@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample 12</title>
+    <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+    <script>
+        // 読み込みが終わってから初期化
+        window.addEventListener ('load', init);
+
+        function init () {
+            // ステージを作成
+            const stage = new createjs.Stage ('myCanvas');
+
+            // 円の作成
+            const circle = new createjs.Shape ();
+            circle.graphics.beginFill ('DarkRed').drawCircle (100, 100, 80);
+            stage.addChild (circle);
+
+            // 四角形の作成
+            const rect = new createjs.Shape ();
+            rect.graphics.beginFill ('blue').drawRect (200, 20, 160, 160);
+            stage.addChild (rect);
+
+            // 各種マウスイベントを登録する
+            circle.addEventListener ('click', handleCircleClick);
+            rect.addEventListener ('click', handleRectClick);
+
+            // クリックしたとき
+            function handleCircleClick (event) {
+                alert ('円がクリックされました');
+            }
+
+            function handleRectClick () {
+                alert ('四角形がクリックされました');
+            }
+
+            stage.update ();
+        }
+    </script>
+</head>
+<body>
+<canvas id="myCanvas" width="640" height="200"></canvas>
+</body>
+</html>
