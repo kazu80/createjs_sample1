@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample 7</title>
+    <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+    <script>
+        window.addEventListener ('load', init);
+
+        function init () {
+            const stage = new createjs.Stage ('myCanvas');
+
+            // コンテナ
+            const container = new createjs.Container ();
+            container.x = 0;
+            container.y = 0;
+            stage.addChild (container);
+
+            // 1つ目の円を作成
+            const circle1 = new createjs.Shape ();
+            circle1.graphics.beginFill ('DarkRed').drawCircle (0, 0, 50);
+            circle1.y = 100;
+
+            // 2つ目の円を作成
+            const circle2 = new createjs.Shape ();
+            circle2.graphics.beginFill ('Blue').drawCircle (0, 0, 50);
+            circle2.y = 300;
+
+            // ２つの円を親に追加する
+            container.addChild (circle1);
+            container.addChild (circle2);
+
+            createjs.Ticker.addEventListener ('tick', handleTick);
+
+            function handleTick () {
+                // 親だけを移動
+                container.x += 1;
+                if (container.x > 960) {
+                    container.x = 0;
+                }
+
+                stage.update ();
+            }
+
+        }
+    </script>
+</head>
+<body>
+<canvas id="myCanvas" width="960" height="640"></canvas>
+</body>
+</html>
