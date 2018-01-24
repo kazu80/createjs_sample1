@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample 20</title>
+    <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+    <script>
+        window.addEventListener ('load', init);
+
+        function init () {
+            const stage = new createjs.Stage ('myCanvas');
+
+            // 円のシェイプを作成
+            const circle = new createjs.Shape ();
+            circle.graphics.beginFill ('DarkRed').drawCircle (0, 0, 50);
+            circle.x = 0;
+            circle.y = 0;
+            stage.addChild (circle);
+
+            createjs.Tween.get (circle)
+            // 画面右下へ移動
+                .to ({x: 940, y: 500, alpha: 0.1}, 2000)
+                // 画面中央上へ移動
+                .to ({x: 500, y: 0, alpha: 1.0}, 3000)
+                // 画面中央へ移動
+                .to ({x: 500, y: 300}, 3000)
+                // 300%の大きさに変形
+                .to ({scaleX: 3, scaleY: 3}, 5000);
+
+            // ステージを更新する
+            createjs.Ticker.addEventListener ('tick', handleTick);
+
+            function handleTick () {
+                stage.update ();
+            }
+        }
+    </script>
+</head>
+<body>
+<canvas id="myCanvas" width="960" height="540"></canvas>
+</body>
+</html>
