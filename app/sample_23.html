@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample 23</title>
+    <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+    <script>
+        // 読み込みが終わってから初期化
+        window.addEventListener ('load', init);
+
+        function init () {
+            // 初期化
+            const stage = new createjs.Stage ('myCanvas');
+
+            // ボールを作成
+            const ball = new createjs.Shape ();
+            ball.graphics.beginFill ('DarkRed').drawCircle (0, 0, 30);
+            ball.x = stage.canvas.width / 2; // 画面水平中央に配置
+            stage.addChild (ball);
+
+            let angleX = 0;
+            let angleY = 0;
+            let centerX = 320;
+            let centerY = 100;
+            let range = 50;
+            let speedX = 0.08;
+            let speedY = 0.12;
+
+            // 時間経過
+            createjs.Ticker.addEventListener ('tick', handleTick);
+
+            function handleTick () {
+                ball.x = centerX + Math.sin (angleX) * range;
+                ball.y = centerY + Math.sin (angleY) * range;
+                angleX += speedX;
+                angleY += speedY;
+
+                stage.update ();
+            }
+
+            // 画面更新の頻度を60FPSに設定
+            createjs.Ticker.timingMode = createjs.TickerRAF;
+        }
+    </script>
+</head>
+<body>
+<canvas id="myCanvas" width="640" height="200"></canvas>
+</body>
+</html>
