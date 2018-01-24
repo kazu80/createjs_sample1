@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample 22</title>
+    <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+    <script>
+        // 読み込みが終わってから初期化
+        window.addEventListener ('load', init);
+
+        function init () {
+            // 初期化
+            const stage = new createjs.Stage ('myCanvas');
+
+            // 空のシェイプを作成（先の描画用）
+            const shape = new createjs.Shape ();
+            stage.addChild (shape);
+
+            // ボールを作成
+            const ball = new createjs.Shape ();
+            ball.graphics.beginFill ('DarkRed').drawCircle (0, 0, 10);
+            ball.x = stage.canvas.width / 2;
+            ball.y = stage.canvas.height / 2;
+            stage.addChild (ball);
+
+            const label = new createjs.Text ('', '32px sans-serif', 'gray');
+            stage.addChild (label);
+
+            // 時間経過
+            createjs.Ticker.addEventListener ('tick', handleTick);
+
+            function handleTick () {
+                // 距離を計算
+                const bx = ball.x - stage.mouseX;
+                const by = ball.y - stage.mouseY;
+                const distance = Math.sqrt (bx * bx + by * by);
+
+                // ラベルに距離を表示
+                label.text = distance + 'px';
+
+                // ２点間を線分でつなぐ
+                shape.graphics.clear ()
+                    .setStrokeStyle (1).beginStroke ('gray')
+                    .moveTo (ball.x, ball.y)
+                    .lineTo (stage.mouseX, stage.mouseY);
+
+                stage.update ();
+            }
+
+            createjs.Ticker.timingMode = createjs.Ticker.RAF;
+        }
+    </script>
+</head>
+<body>
+<canvas id="myCanvas" width="640" height="200"></canvas>
+</body>
+</html>
