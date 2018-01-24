@@ -12,6 +12,7 @@
         let particleStage = null;
         let particles = [];
         let isBound = false;
+        let isClick = false;
 
         const stageNamePattern = {
             START: 0,
@@ -19,7 +20,11 @@
             MOVE : 2
         };
 
+        const MOUSE_BOUNDS_RADIUS = 200;
+
         let stageName = stageNamePattern.START;
+
+        let mousePoint = new createjs.Point ();
 
         // 読み込みが終わってから初期化
         window.addEventListener ('load', init);
@@ -28,7 +33,7 @@
             // 初期化
             stage = new createjs.Stage ('myCanvas');
 
-            const manifest = [{id: 'logo', src: 'images/demo_logo_1.png'}];
+            const manifest = [{id: 'logo', src: 'images/demo_logo_2.png'}];
             const queue = new createjs.LoadQueue ();
 
             particleStage = new createjs.Container ();
@@ -38,6 +43,13 @@
 
                 const canvas = document.getElementById ('myCanvas');
                 const context = canvas.getContext ('2d');
+
+                stage.on ('stagemouseup', function (evt) {
+                    isClick = true;
+                    isBound = true;
+                    mousePoint.x = evt.stageX;
+                    return mousePoint.y = evt.stageY;
+                });
 
                 imgFile = queue.getResult ('logo');
 
@@ -65,15 +77,22 @@
             queue.loadManifest (manifest, true);
         }
 
+        /**
+         * Create Location Data
+         * @param imgMap
+         * @returns {Array}
+         */
         function createLocationData (imgMap) {
-            let buket, height, imgData, index, results, width, x, y;
+            let buket, height, imgData, index, width, x, y;
 
+            // canvas data
             imgData = imgMap.data;
+
+            // イメージの幅と高さ
             width = imgFile.width;
             height = imgFile.height;
-            y = 0;
-            results = [];
 
+            y = 0;
             while (y < height) {
                 x = 0;
                 while (x < width) {
@@ -85,8 +104,8 @@
                         buket = {
                             //x: x + (mView.offsetWidth / 2) - (imgFile.width / 2),
                             //y: y + (mView.offsetHeight / 2) - (imgFile.height / 2),
-                            x     : x,
-                            y     : y,
+                            x     : x + 100, // パーティクルの表示位置
+                            y     : y + 100, // パーティクルの表示位置
                             baseX : x,
                             baseY : y,
                             r     : imgData[index + 0],
@@ -95,18 +114,35 @@
                             alpha : imgData[index + 3],
                             tweenX: false,
                             tweenY: false,
-                            scale : Math.random () * 1 + .5,
+                            // scale : Math.random () * 1 + .5, // パーティクルの大きさ
+                            scale : 0.5, // パーティクルの大きさ
                             bound : false
                         };
 
-                        baseParticles.push (buket);
+                        /**
+                         * 透明の場合、RGBAともに0で来る
+                         * その場合は、パーティクルを生成しない
+                         */
+                        if (buket.r === 0 && buket.g === 0 && buket.b === 0 && buket.alpha === 0) {
+
+                        } else {
+                            baseParticles.push (buket);
+                        }
                     }
 
-                    x += 7;
+                    /**
+                     * X 軸の粒度
+                     */
+                    // x += 7;
+                    x += 3;
                 }
-                results.push (y += 7);
+
+                /**
+                 * Y 軸の粒度
+                 */
+                //results.push (y += 7);
+                y += 3;
             }
-            return results;
         }
 
         function createLogo () {
@@ -131,9 +167,11 @@
         function mainLoop () {
             switch (stageName) {
                 case stageNamePattern.START:
+                    // 表示
                     showParticles ();
                     break;
                 case stageNamePattern.MOVE:
+                    // 動く
                     moveParticles ();
             }
             stage.update ();
@@ -142,28 +180,50 @@
 
         function showParticles () {
             let circle, i, index, len, particleCount, results, scale;
+
             if (stageName === stageNamePattern.START) {
+
+                // stageName 変更
                 stageName = stageNamePattern.SHOW;
+
                 particleCount = 0;
                 results = [];
+                // パーティクルの数処理する
                 for (index = i = 0, len = particles.length; i < len; index = ++i) {
                     circle = particles[index];
+
                     circle.scaleX = 0;
                     circle.scaleY = 0;
+
                     scale = baseParticles[index].scale;
-                    results.push (createjs.Tween.get (circle).wait (Math.random () * 500 + 500).to ({
-                                                                                                        scaleX: scale,
-                                                                                                        scaleY: scale
-                                                                                                    }, Math.random () * 2000 + 1000,
-                                                                                                    createjs.Ease.getElasticOut (Math.random () * 5 + 1, Math.random () * .25 + .1)).call (
-                        function () {
-                            particleCount++;
-                            if (particleCount === particles.length) {
-                                return setTimeout (function () {
-                                    return stageName = stageNamePattern.MOVE;
-                                }, 100);
-                            }
-                        }));
+
+                    results.push (
+                        createjs.Tween.get (circle)
+                            .wait (Math.random () * 500 + 500)
+                            .to (
+                                {
+                                    scaleX: scale,
+                                    scaleY: scale
+                                },
+                                Math.random () * 2000 + 1000,
+                                createjs.Ease.getElasticOut (
+                                    Math.random () * 5 + 1,
+                                    Math.random () * .25 + .1
+                                )
+                            )
+                            .call (
+                                function () {
+                                    particleCount++;
+
+                                    // すべてのパーティクルの表示が終わったら
+                                    if (particleCount === particles.length) {
+                                        return setTimeout (function () {
+                                            return stageName = stageNamePattern.MOVE;
+                                        }, 100);
+                                    }
+                                }
+                            )
+                    );
                 }
                 return results;
             }
@@ -238,6 +298,35 @@
                     isBound = false;
                 }
             }
+        }
+
+        function calcuSides (basePoint, targetPoint) {
+            let _x, _y, _z;
+            _x = Math.abs (basePoint.x - targetPoint.x);
+            _y = Math.abs (basePoint.y - targetPoint.y);
+            _z = Math.sqrt (Math.pow (_x, 2) + Math.pow (_y, 2));
+            return {x: _x, y: _y, z: _z};
+
+        }
+
+        function calcu2PointSin (basePoint, targetPoint) {
+            let sides, sin;
+            sides = calcuSides (basePoint, targetPoint);
+            sin = sides.y / sides.z;
+            if (basePoint.y > targetPoint.y) {
+                sin *= -1;
+            }
+            return sin;
+        }
+
+        function calcu2PointCos (basePoint, targetPoint) {
+            let cos, sides;
+            sides = calcuSides (basePoint, targetPoint);
+            cos = sides.x / sides.z;
+            if (basePoint.x > targetPoint.x) {
+                cos *= -1;
+            }
+            return cos;
         }
 
     </script>
