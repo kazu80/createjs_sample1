@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo 1</title>
+    <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+    <script>
+        let stage = null;
+        let mView = null;
+        let imgFile = null;
+        let baseParticles = [];
+        let particleStage = null;
+        let particles = [];
+        let isBound = false;
+
+        const stageNamePattern = {
+            START: 0,
+            SHOW : 1,
+            MOVE : 2
+        };
+
+        let stageName = stageNamePattern.START;
+
+        // 読み込みが終わってから初期化
+        window.addEventListener ('load', init);
+
+        function init () {
+            // 初期化
+            stage = new createjs.Stage ('myCanvas');
+
+            const manifest = [{id: 'logo', src: 'images/demo_logo_1.png'}];
+            const queue = new createjs.LoadQueue ();
+
+            particleStage = new createjs.Container ();
+
+            queue.on ('complete', function () {
+                mView = document.querySelector ('body');
+
+                const canvas = document.getElementById ('myCanvas');
+                const context = canvas.getContext ('2d');
+
+                imgFile = queue.getResult ('logo');
+
+                // 一度画像をstage上に表示する
+                const logoImg = new createjs.Bitmap (imgFile);
+                stage.addChild (logoImg);
+                stage.update ();
+
+                //
+                const logoImgMamp = context.getImageData (0, 0, imgFile.width, imgFile.height);
+                createLocationData (logoImgMamp);
+                stage.removeChild (logoImg);
+
+                createLogo ();
+                stage.update ();
+                stage.addChild (particleStage);
+
+                // 33fpsでTickerを実行する
+                createjs.Ticker.framerate = 33;
+
+                createjs.Ticker.addEventListener ('tick', mainLoop);
+
+            });
+
+            queue.loadManifest (manifest, true);
+        }
+
+        function createLocationData (imgMap) {
+            let buket, height, imgData, index, results, width, x, y;
+
+            imgData = imgMap.data;
+            width = imgFile.width;
+            height = imgFile.height;
+            y = 0;
+            results = [];
+
+            while (y < height) {
+                x = 0;
+                while (x < width) {
+                    // 配列の格納順が [r, g, b, alpha, r, g, b, alpha...] という順番で格納されているので、4つ分ずらしている。
+                    index = (x + y * width) * 4;
+
+                    // rgbの合計値が700以下のピクセルだった場合に取得
+                    if (700 > imgData[index + 0] + imgData[index + 1] + imgData[index + 2]) {
+                        buket = {
+                            //x: x + (mView.offsetWidth / 2) - (imgFile.width / 2),
+                            //y: y + (mView.offsetHeight / 2) - (imgFile.height / 2),
+                            x     : x,
+                            y     : y,
+                            baseX : x,
+                            baseY : y,
+                            r     : imgData[index + 0],
+                            g     : imgData[index + 1],
+                            b     : imgData[index + 2],
+                            alpha : imgData[index + 3],
+                            tweenX: false,
+                            tweenY: false,
+                            scale : Math.random () * 1 + .5,
+                            bound : false
+                        };
+
+                        baseParticles.push (buket);
+                    }
+
+                    x += 7;
+                }
+                results.push (y += 7);
+            }
+            return results;
+        }
+
+        function createLogo () {
+            let circle, i, index, len, local, results, rgba;
+            results = [];
+            for (index = i = 0, len = baseParticles.length; i < len; index = ++i) {
+                local = baseParticles[index];
+                circle = new createjs.Shape ();
+                circle.no = index;
+                circle.x = local.x;
+                circle.y = local.y;
+                circle.scaleX = 0;
+                circle.scaleY = 0;
+                rgba = 'rgba(' + local.r + ',' + local.g + ',' + local.b + ', 1)';
+                circle.graphics.beginFill (rgba).drawCircle (0, 0, 2);
+                particles.push (circle);
+                results.push (particleStage.addChild (circle));
+            }
+            return results;
+        }
+
+        function mainLoop () {
+            switch (stageName) {
+                case stageNamePattern.START:
+                    showParticles ();
+                    break;
+                case stageNamePattern.MOVE:
+                    moveParticles ();
+            }
+            stage.update ();
+            return isClick = false;
+        }
+
+        function showParticles () {
+            let circle, i, index, len, particleCount, results, scale;
+            if (stageName === stageNamePattern.START) {
+                stageName = stageNamePattern.SHOW;
+                particleCount = 0;
+                results = [];
+                for (index = i = 0, len = particles.length; i < len; index = ++i) {
+                    circle = particles[index];
+                    circle.scaleX = 0;
+                    circle.scaleY = 0;
+                    scale = baseParticles[index].scale;
+                    results.push (createjs.Tween.get (circle).wait (Math.random () * 500 + 500).to ({
+                                                                                                        scaleX: scale,
+                                                                                                        scaleY: scale
+                                                                                                    }, Math.random () * 2000 + 1000,
+                                                                                                    createjs.Ease.getElasticOut (Math.random () * 5 + 1, Math.random () * .25 + .1)).call (
+                        function () {
+                            particleCount++;
+                            if (particleCount === particles.length) {
+                                return setTimeout (function () {
+                                    return stageName = stageNamePattern.MOVE;
+                                }, 100);
+                            }
+                        }));
+                }
+                return results;
+            }
+        }
+
+        function moveParticles () {
+            let _x, _y, i, index, len, particle, rate, results, sides, sin, velocityX, velocityY;
+            results = [];
+            for (index = i = 0, len = particles.length; i < len; index = ++i) {
+                particle = particles[index];
+                _x = particle.x;
+                _y = particle.y;
+                // バウンドのTween
+                if (isClick) {
+                    particle.bound = true;
+                    particle.tweenX = false;
+                    particle.tweenY = false;
+                    sides = calcuSides (mousePoint, {x: _x, y: _y});
+                    if (sides.z < MOUSE_BOUNDS_RADIUS) {
+                        rate = {
+                            x: MOUSE_BOUNDS_RADIUS * calcu2PointCos (mousePoint, {x: _x, y: _y}),
+                            y: MOUSE_BOUNDS_RADIUS * calcu2PointSin (mousePoint, {x: _x, y: _y})
+                        };
+                        sin = calcu2PointCos (mousePoint, {x: _x, y: _y});
+                        velocityX = rate.x + Math.random () * 20 + 10;
+                        velocityY = rate.y + Math.random () * 20 + 10;
+                        createjs.Tween.get (particle, {override: true}).to ({
+                                                                                x: particle.x + velocityX,
+                                                                                y: particle.y + velocityY
+                                                                            }, (Math.random () * 1200 + 1000) * (1 - sides.z / MOUSE_BOUNDS_RADIUS),
+                                                                            createjs.Ease.backOut).call (function () {
+                            return createjs.Tween.get (this).to ({
+                                                                     x: baseParticles[this.no].x,
+                                                                     y: baseParticles[this.no].y
+                                                                 }, Math.random () * 5000 + 4000,
+                                                                 createjs.Ease.getElasticOut (
+                                                                     1, Math.random () * .25 + .1));
+                        });
+                    }
+                    // アメーバTween
+                } else if (!isBound) {
+                    if (!particle.tweenX) {
+                        particle.tweenX = true;
+                        createjs.Tween.get (particle).to ({
+                                                              x: baseParticles[particle.no].x + Math.random () * 10 - 5
+                                                          }, Math.random () * 900 + 700, createjs.Ease.sineInOut).call (
+                            function () {
+                                return this.tweenX = false;
+                            });
+                    }
+                    if (!particle.tweenY) {
+                        particle.tweenY = true;
+                        results.push (createjs.Tween.get (particle).to ({
+                                                                            y: baseParticles[particle.no].y + Math.random () * 10 - 5
+                                                                        }, Math.random () * 900 + 700,
+                                                                        createjs.Ease.sineInOut).call (function () {
+                            return this.tweenY = false;
+                        }));
+                    }
+                }
+            }
+            if (isBound) {
+                //tweenで動いているオブジェクトがないかを確認
+                let isActive = false;
+                particles.forEach (function (particle) {
+                    if (isActive) {
+                        return
+                    }
+                    isActive = createjs.Tween.hasActiveTweens (particle);
+                });
+                if (!isActive) {
+                    isBound = false;
+                }
+            }
+        }
+
+    </script>
+</head>
+<body>
+<canvas id="myCanvas" width="640" height="600"></canvas>
+</body>
+</html>
