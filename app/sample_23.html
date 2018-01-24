@@ -18,6 +18,7 @@
             ball.x = stage.canvas.width / 2; // 画面水平中央に配置
             stage.addChild (ball);
 
+            /*
             let angleX = 0;
             let angleY = 0;
             let centerX = 320;
@@ -25,15 +26,27 @@
             let range = 50;
             let speedX = 0.08;
             let speedY = 0.12;
+            */
+
+            let angle = 0;
+            let centerY = 100;
+            let range = 50;
+            let xSpeed = 1;
+            let ySpeed = 0.05;
 
             // 時間経過
             createjs.Ticker.addEventListener ('tick', handleTick);
 
             function handleTick () {
+                /*
                 ball.x = centerX + Math.sin (angleX) * range;
                 ball.y = centerY + Math.sin (angleY) * range;
                 angleX += speedX;
                 angleY += speedY;
+                */
+                ball.x += xSpeed;
+                ball.y = centerY + Math.sin (angle) * range;
+                angle += ySpeed;
 
                 stage.update ();
             }
