@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample 18</title>
+    <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+    <script>
+        window.addEventListener ('load', init);
+
+        function init () {
+            // Stageオブジェクトを作成。表示リストのルートになります。
+            const stage = new createjs.Stage ('myCanvas');
+
+            // 大きな星を作成します
+            const poly = new createjs.Shape ();
+            stage.addChild (poly);
+            poly.x = 200;
+            poly.y = 100;
+
+            // 小さな星を作成します
+            const miniStar = new createjs.Shape ();
+            miniStar.graphics.beginFill ('blue').drawPolyStar (0, 0, 10, 5, 0.6, -90);
+            miniStar.y = 100;
+            stage.addChild (miniStar);
+
+            // 小さな星の移動速度です
+            let vx = +10;
+
+            // 時間経過イベント
+            createjs.Ticker.addEventListener ('tick', handleTick);
+
+            function handleTick () {
+                // 小さな星のモーションを指定
+                miniStar.x += vx;
+                if (miniStar.x > 400) {
+                    vx = -10;
+                    miniStar.x = 400;
+                } else if (miniStar.x < 0) {
+                    vx = +10;
+                    miniStar.x = 0;
+                }
+
+                // 小さな星と大きな星の相対座標を求める
+                const point = miniStar.localToLocal (0, 0, poly);
+
+                // 大きな星と小さな星が当たっているかを調べる
+                const isHit = poly.hitTest (point.x, point.y);
+
+                if (isHit === true) {
+                    // 大きな星を
+                    poly.graphics.clear ()
+                        .beginFill ('DarkRed')
+                        .drawPolyStar (0, 0, 75, 10, 0.6, -90);
+                } else {
+                    poly.graphics.clear ()
+                        .beginFill ('green')
+                        .drawPolyStar (0, 0, 75, 10, 0.6, -90);
+                }
+
+                stage.update ();
+            }
+        }
+    </script>
+</head>
+<body>
+<canvas id="myCanvas" width="640" height="200"></canvas>
+</body>
+</html>
