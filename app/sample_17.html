@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample 17</title>
+    <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+    <script>
+        window.addEventListener ('load', init);
+
+        function init () {
+            // Stageオブジェクトを作成。表示リストのルートになります。
+            const stage = new createjs.Stage ('myCanvas');
+
+            // 星を生成します
+            const poly = new createjs.Shape ();
+            poly.graphics.beginFill ('DarkRed');
+            poly.graphics.drawPolyStar (0, 0, 75, 5, 0.6, -90); // 75pxの星を記述
+            stage.addChild (poly);
+
+            poly.x = 200;
+            poly.y = 100;
+
+            // 点を作成します
+            const dot = new createjs.Shape ();
+            dot.graphics.beginFill ('blue').drawCircle (0, 0, 5);
+            stage.addChild (dot);
+
+            // 時間経過のイベント
+            createjs.Ticker.addEventListener ('tick', handleTick);
+
+            function handleTick () {
+                // ドットのモーションを指定
+                dot.x = stage.mouseX;
+                dot.y = stage.mouseY;
+
+                // 星から見た相対座標に変換する
+                const point = poly.globalToLocal (stage.mouseX, stage.mouseY);
+
+                // 星とドットがあたっているかを調べる
+                const isHit = poly.hitTest (point.x, point.y);
+
+                // 当たっていれば
+                if (isHit === true) {
+                    // 赤色で塗る
+                    poly.graphics.clear ()
+                        .beginFill ('DarkRed')
+                        .drawPolyStar (0, 0, 75, 5, 0.6, -90);
+                } else {
+                    // 緑色で塗る
+                    poly.graphics.clear ()
+                        .beginFill ('green')
+                        .drawPolyStar (0, 0, 75, 5, 0.6, -90);
+                }
+
+                // Stageの描画を更新
+                stage.update ();
+            }
+        }
+    </script>
+</head>
+<body>
+<canvas id="myCanvas" width="640" height="200"></canvas>
+</body>
+</html>
