@@ -14,11 +14,13 @@
 
             const options = [];
             const balls = [];
-            for (let i = 0; i < 10; i++) {
+
+            for (let i = 0; i < 20; i++) {
                 // 円を作成します
                 const ball = new createjs.Shape ();
+
                 ball.graphics.beginFill ('DarkRed'); // 赤色で描画するように設定
-                ball.graphics.drawCircle (0, 0, 10); //半径 100px の円を描画
+                ball.graphics.drawCircle (0, 0, 5); //半径 100px の円を描画
                 stage.addChild (ball); // 表示リストに追加
 
                 ball.x = stage.canvas.width * Math.random ();
@@ -26,15 +28,14 @@
 
                 balls[i] = ball;
                 options[i] = {
-                    centerX: ball.x
+                    centerX: ball.x,
+                    angle  : 0
                 };
             }
 
-            let angle = 0;
-            // const centerY = 100;
-            const range = 5;
-            const xSpeed = 0.05;
-            const ySpeed = -2;
+            const range = 10; // 振り幅
+            const xSpeed = 0.09; // 振り幅スピード
+            const ySpeed = -1; // 上りスピード
 
             // 時間経過
             createjs.Ticker.addEventListener ('tick', handleTick);
@@ -45,10 +46,11 @@
                     const ball = balls[i];
                     const option = options[i];
 
-                    ball.x = option.centerX + Math.sin (angle) * range;
+                    ball.x = option.centerX + Math.sin (option.angle) * range;
                     ball.y += ySpeed;
 
-                    angle += xSpeed;
+                    // Set Math.sin (angle)
+                    options[i].angle += xSpeed;
 
                     // 画面端の処理
                     if (ball.y < 0) {
@@ -62,7 +64,8 @@
             }
 
             // 画面更新の頻度を60FPSに設定
-            createjs.Ticker.timingMode = createjs.Ticker.RAF;
+            // createjs.Ticker.timingMode = createjs.Ticker.RAF;
+            createjs.Ticker.framerate = 33;
         }
     </script>
 </head>
