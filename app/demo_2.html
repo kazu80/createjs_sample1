@@ -12,28 +12,33 @@
             // 初期化
             const stage = new createjs.Stage ('myCanvas');
             const options = [];
-            const balls = [];
+            const particles = [];
 
             // パーティクル作成
-            const particle = 10;
-            const particle_width = 4;
-            for (let i = 0; i < particle; i++) {
+            const particle_count = 20;
+            const particle_width = 6;
+            const particle_color_fill = 'DarkRed';
+
+            //
+            for (let i = 0; i < particle_count; i++) {
                 // 円を作成します
-                const ball = new createjs.Shape ();
+                const particle = new createjs.Shape ();
+                particle.graphics.beginFill (particle_color_fill); // 赤色で描画するように設定
+                particle.graphics.drawCircle (0, 0, particle_width / 2); // 半径 Xpx の円を描画
 
-                ball.graphics.beginFill ('DarkRed'); // 赤色で描画するように設定
-                ball.graphics.drawCircle (0, 0, particle_width / 2); // 半径 Xpx の円を描画
-                stage.addChild (ball); // 表示リストに追加
+                // 表示リストに追加
+                stage.addChild (particle);
 
-                ball.x = stage.canvas.width * Math.random ();
-                ball.y = stage.canvas.height + particle_width;
+                // パーティクルをキャンバスの枠外下に配置
+                particle.x = getRandomInt (particle_width, stage.canvas.width - particle_width);
+                particle.y = stage.canvas.height + particle_width;
 
                 // particle instants
-                balls[i] = ball;
+                particles[i] = particle;
 
                 // particle options
                 options[i] = {
-                    centerX: ball.x,
+                    centerX: particle.x,
                     angle  : 0,
                     speedX : getRandomArbitary (0.01, 0.05), // 振り幅スピード
                     speedY : -1 * getRandomInt (2, 9), // 上がるスピード
@@ -44,26 +49,36 @@
             // 時間経過
             createjs.Ticker.addEventListener ('tick', handleTick);
 
+            /**
+             * handleTick
+             */
             function handleTick () {
-
-                for (let i = 0; i < balls.length; i++) {
-                    const ball = balls[i];
+                // パーティクル単体の設定
+                for (let i = 0; i < particles.length; i++) {
+                    // option
+                    const particle = particles[i];
                     const option = options[i];
                     const speedX = option.speedX;
                     const speedY = option.speedY;
                     const range = option.range;
 
-                    ball.x = option.centerX + Math.sin (option.angle) * range;
-                    ball.y += speedY;
+                    // ｘ座標（ゆらゆら）
+                    particle.x = option.centerX + Math.sin (option.angle) * range;
+
+                    // y座標（上昇）
+                    particle.y += speedY;
 
                     // Set Math.sin (angle)
                     options[i].angle += speedX;
 
-                    // 画面端の処理
-                    if (ball.y < 0) {
-                        ball.y = stage.canvas.height + 10;
-                        ball.x = stage.canvas.width * Math.random ();
-                        options[i].centerX = ball.x;
+                    // 画面端に到達時の処理
+                    if (particle.y < 0) {
+                        // パーティクルをキャンバスの枠外下に配置
+                        particle.x = getRandomInt (particle_width, stage.canvas.width - particle_width);
+                        particle.y = stage.canvas.height + particle_width;
+
+                        // centerXを初期化
+                        options[i].centerX = particle.x;
                     }
                 }
 
