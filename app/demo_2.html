@@ -12,19 +12,27 @@
             // 初期化
             const stage = new createjs.Stage ('myCanvas');
 
-            // 円を作成します
-            const ball = new createjs.Shape ();
-            ball.graphics.beginFill ('DarkRed'); // 赤色で描画するように設定
-            ball.graphics.drawCircle (0, 0, 10); //半径 100px の円を描画
+            const options = [];
+            const balls = [];
+            for (let i = 0; i < 10; i++) {
+                // 円を作成します
+                const ball = new createjs.Shape ();
+                ball.graphics.beginFill ('DarkRed'); // 赤色で描画するように設定
+                ball.graphics.drawCircle (0, 0, 10); //半径 100px の円を描画
+                stage.addChild (ball); // 表示リストに追加
 
-            ball.x = stage.canvas.width / 2;
-            ball.y = stage.canvas.height + 10;
+                ball.x = stage.canvas.width * Math.random ();
+                ball.y = stage.canvas.height + 10;
 
-            stage.addChild (ball); // 表示リストに追加
+                balls[i] = ball;
+                options[i] = {
+                    centerX: ball.x
+                };
+            }
 
             let angle = 0;
-            const centerY = 100;
-            const range = 50;
+            // const centerY = 100;
+            const range = 5;
             const xSpeed = 0.05;
             const ySpeed = -2;
 
@@ -33,13 +41,21 @@
 
             function handleTick () {
 
-                ball.x = centerY + Math.sin (angle) * range;
-                ball.y += ySpeed;
-                angle += xSpeed;
+                for (let i = 0; i < balls.length; i++) {
+                    const ball = balls[i];
+                    const option = options[i];
 
-                // 画面端の処理
-                if (ball.y < 0) {
-                    ball.y = stage.canvas.height + 10;
+                    ball.x = option.centerX + Math.sin (angle) * range;
+                    ball.y += ySpeed;
+
+                    angle += xSpeed;
+
+                    // 画面端の処理
+                    if (ball.y < 0) {
+                        ball.y = stage.canvas.height + 10;
+                        ball.x = stage.canvas.width * Math.random ();
+                        options[i].centerX = ball.x;
+                    }
                 }
 
                 stage.update ();
