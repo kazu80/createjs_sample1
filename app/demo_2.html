@@ -11,31 +11,35 @@
         function init () {
             // 初期化
             const stage = new createjs.Stage ('myCanvas');
-
             const options = [];
             const balls = [];
 
-            for (let i = 0; i < 20; i++) {
+            // パーティクル作成
+            const particle = 10;
+            const particle_width = 4;
+            for (let i = 0; i < particle; i++) {
                 // 円を作成します
                 const ball = new createjs.Shape ();
 
                 ball.graphics.beginFill ('DarkRed'); // 赤色で描画するように設定
-                ball.graphics.drawCircle (0, 0, 5); //半径 100px の円を描画
+                ball.graphics.drawCircle (0, 0, particle_width / 2); // 半径 Xpx の円を描画
                 stage.addChild (ball); // 表示リストに追加
 
                 ball.x = stage.canvas.width * Math.random ();
-                ball.y = stage.canvas.height + 10;
+                ball.y = stage.canvas.height + particle_width;
 
+                // particle instants
                 balls[i] = ball;
+
+                // particle options
                 options[i] = {
                     centerX: ball.x,
-                    angle  : 0
+                    angle  : 0,
+                    speedX : getRandomArbitary (0.01, 0.05), // 振り幅スピード
+                    speedY : -1 * getRandomInt (2, 9), // 上がるスピード
+                    range  : getRandomInt (1, 30), // 振り幅
                 };
             }
-
-            const range = 10; // 振り幅
-            const xSpeed = 0.09; // 振り幅スピード
-            const ySpeed = -1; // 上りスピード
 
             // 時間経過
             createjs.Ticker.addEventListener ('tick', handleTick);
@@ -45,12 +49,15 @@
                 for (let i = 0; i < balls.length; i++) {
                     const ball = balls[i];
                     const option = options[i];
+                    const speedX = option.speedX;
+                    const speedY = option.speedY;
+                    const range = option.range;
 
                     ball.x = option.centerX + Math.sin (option.angle) * range;
-                    ball.y += ySpeed;
+                    ball.y += speedY;
 
                     // Set Math.sin (angle)
-                    options[i].angle += xSpeed;
+                    options[i].angle += speedX;
 
                     // 画面端の処理
                     if (ball.y < 0) {
@@ -64,8 +71,28 @@
             }
 
             // 画面更新の頻度を60FPSに設定
-            // createjs.Ticker.timingMode = createjs.Ticker.RAF;
-            createjs.Ticker.framerate = 33;
+            createjs.Ticker.timingMode = createjs.Ticker.RAF;
+            // createjs.Ticker.framerate = 33;
+        }
+
+        /**
+         * 乱数発生
+         * @param min
+         * @param max
+         * @returns {*}
+         */
+        function getRandomArbitary (min, max) {
+            return Math.random () * (max - min) + min;
+        }
+
+        /**
+         * 乱数発生（Integer）
+         * @param min
+         * @param max
+         * @returns {*}
+         */
+        function getRandomInt (min, max) {
+            return Math.floor (Math.random () * (max - min + 1)) + min;
         }
     </script>
 </head>
