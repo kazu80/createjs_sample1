@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo 3</title>
+    <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+    <script>
+        let stage;
+        let queue;
+        let imgFile;
+        let baseParticles = [];
+        let particles = [];
+
+        // 読み込みが終わってから初期化
+        window.addEventListener ('load', init);
+
+        function init () {
+            // 初期化
+            stage = new createjs.Stage ('myCanvas');
+
+            // LoadQueue
+            queue = new createjs.LoadQueue ();
+            queue.on ('complete', loadQueueComplete);
+            queue.loadManifest ([{id: 'background', src: 'images/demo_logo_4.png'}], true);
+        }
+
+        /**
+         * loadQueueComplete
+         * 画像読み込み終わり
+         */
+        let canvas;
+
+        function loadQueueComplete () {
+
+            canvas = document.getElementById ('myCanvas');
+            const context = canvas.getContext ('2d');
+
+            imgFile = queue.getResult ('background');
+
+            // 一度画像をstage上に表示する
+            const logoImg = new createjs.Bitmap (imgFile);
+
+            // ロゴ画像表示
+            stage.addChild (logoImg);
+            stage.update ();
+
+            // canvasから画像データを取得
+            const logoImgMamp = context.getImageData (0, 0, imgFile.width, imgFile.height);
+            createLocationData (logoImgMamp, canvas);
+
+            stage.removeChild (logoImg);
+            stage.update ();
+
+            const particleStage = createLogo ();
+            stage.addChild (particleStage);
+
+            createjs.Ticker.addEventListener ('tick', mainLoop);
+        }
+
+        const stageNamePattern = {
+            START: 0,
+            SHOW : 1,
+            MOVE : 2
+        };
+
+        let stageName = stageNamePattern.START;
+
+        function mainLoop () {
+            switch (stageName) {
+                case stageNamePattern.START:
+                    // 表示
+                    showParticles ();
+                    break;
+                case stageNamePattern.MOVE:
+                // 動く
+                // moveParticles ();
+            }
+            stage.update ();
+            return isClick = false;
+        }
+
+        // 解析の詳細度
+        const detailX = 3;
+        const detailY = 3;
+
+        function showParticles () {
+            let circle, i, index, len, particleCount, results, scale;
+            let particleCount1 = 0;
+            let particleCount2 = 0;
+            let particleCount3 = 0;
+
+            let isLogo = false;
+
+            if (stageName === stageNamePattern.START) {
+
+                // stageName 変更
+                stageName = stageNamePattern.SHOW;
+
+                particleCount = 0;
+                results = [];
+                // パーティクルの数処理する
+                for (index = i = 0, len = particles.length; i < len; index = ++i) {
+                    circle = particles[index];
+
+                    circle.y = baseParticles[index].y + 50;
+                    circle.visible = false;
+                    circle.alpha = 0;
+
+                    circle.scaleX = 0;
+                    circle.scaleY = 0;
+
+                    scale = baseParticles[index].scale;
+
+                    circle.scaleX = scale;
+                    circle.scaleY = scale;
+
+                    // 動き
+                    let logoImg;
+                    results.push (
+                        createjs.Tween.get (circle)
+                            .wait (getRandomInt (1, 4000))
+                            .to ({visible: true})
+                            .to ({
+                                     y    : baseParticles[index].y,
+                                     alpha: 1,
+                                 }, 1000, createjs.Ease.cubicIn)
+                            .call (() => {
+                                particleCount1++;
+
+                                // すべてのパーティクルの表示が終わったら
+                                if (particleCount1 === parseInt (particles.length / 4) && isLogo === false) {
+                                    logoImg = new createjs.Bitmap (imgFile);
+                                    logoImg.x = (canvas.width / 2) - (imgFile.width / 2);
+                                    logoImg.y = (canvas.height / 2) - (imgFile.height / 2);
+
+                                    logoImg.alpha = 0;
+
+                                    createjs.Tween.get (logoImg)
+                                        .to ({alpha: 1}, 3000, createjs.Ease.cubicOut);
+
+                                    // ロゴ画像表示
+                                    stage.addChild (logoImg);
+
+                                    //
+                                    isLogo = true;
+                                }
+                            })
+                            .to ({scaleX: 0, scaleY: 0}, 2000, createjs.Ease.circIn)
+                            .wait (5000) // ここで元画像だけがくっきり見える
+                            .to ({
+                                     scaleX: baseParticles[index].scale,
+                                     scaleY: baseParticles[index].scale
+                                 }, 1)
+                            .to ({
+                                     y    : baseParticles[index].y - 50,
+                                     alpha: 0
+                                 },
+                                 500,
+                            )
+                            .call (() => {
+                                // すべてのパーティクルの表示が終わったら
+                                if (logoImg) {
+                                    createjs.Tween.get (logoImg)
+                                        .to ({alpha: 0}, 3000, createjs.Ease.cubicOut);
+                                }
+                            })
+                            .call (
+                                function () {
+                                    particleCount++;
+
+                                    // すべてのパーティクルの表示が終わったら
+                                    if (particleCount === particles.length) {
+                                        return setTimeout (function () {
+                                            return stageName = stageNamePattern.MOVE;
+                                        }, 100);
+                                    }
+                                }
+                            )
+                    );
+                }
+                return results;
+            }
+        }
+
+        /**
+         * Create Location Data
+         * @param imgMap
+         * @param canvas
+         * @returns {Array}
+         */
+        function createLocationData (imgMap, canvas) {
+            let buket, height, imgData, index, width, x, y;
+
+            // canvas data
+            imgData = imgMap.data;
+
+            // イメージの幅と高さ
+            width = imgFile.width;
+            height = imgFile.height;
+
+            y = 0;
+            while (y < height) {
+                x = 0;
+                while (x < width) {
+                    // 配列の格納順が [r, g, b, alpha, r, g, b, alpha...] という順番で格納されているので、4つ分ずらしている。
+                    index = (x + y * width) * 4;
+
+                    // rgbの合計値が700以下のピクセルだった場合に取得
+                    if (7000 > imgData[index + 0] + imgData[index + 1] + imgData[index + 2]) {
+                        buket = {
+                            x     : x + (canvas.width / 2) - (imgFile.width / 2),
+                            y     : y + (canvas.height / 2) - (imgFile.height / 2),
+                            baseX : x,
+                            baseY : y,
+                            r     : imgData[index + 0],
+                            g     : imgData[index + 1],
+                            b     : imgData[index + 2],
+                            alpha : imgData[index + 3],
+                            tweenX: false,
+                            tweenY: false,
+                            scale : getRandomArbitary (0.3, 1.8), // パーティクルの大きさ
+                            bound : false
+                        };
+
+                        /**
+                         * 透明の場合、RGBAともに0で来る
+                         * その場合は、パーティクルを生成しない
+                         */
+                        if (buket.r === 0 && buket.g === 0 && buket.b === 0 && buket.alpha === 0) {
+                        } else {
+                            baseParticles.push (buket);
+                        }
+                    } else {
+
+                    }
+
+                    /**
+                     * X 軸の粒度
+                     */
+                    x += detailX;
+                }
+
+                /**
+                 * Y 軸の粒度
+                 */
+                y += detailY;
+            }
+        }
+
+        /**
+         * create logo
+         */
+        function createLogo () {
+            let circle, i, index, len, local, results, rgba;
+
+            const particleStage = new createjs.Container ();
+
+            results = [];
+            for (index = i = 0, len = baseParticles.length; i < len; index = ++i) {
+                local = baseParticles[index];
+
+                circle = new createjs.Shape ();
+                circle.no = index;
+                circle.x = local.x;
+                circle.y = local.y;
+                circle.scaleX = 0;
+                circle.scaleY = 0;
+
+                rgba = 'rgba(' + local.r + ',' + local.g + ',' + local.b + ', 1)';
+
+                circle.graphics.beginFill (rgba).drawCircle (0, 0, 2);
+                particles.push (circle);
+                results.push (particleStage.addChild (circle));
+            }
+
+            return particleStage;
+        }
+
+        /**
+         * 乱数発生
+         * @param min
+         * @param max
+         * @returns {*}
+         */
+        function getRandomArbitary (min, max) {
+            return Math.random () * (max - min) + min;
+        }
+
+        /**
+         * 乱数発生（Integer）
+         * @param min
+         * @param max
+         * @returns {*}
+         */
+        function getRandomInt (min, max) {
+            return Math.floor (Math.random () * (max - min + 1)) + min;
+        }
+    </script>
+    <style>
+        body {
+            margin : 0;
+        }
+
+        main {
+            position          : relative;
+            margin            : 20px;
+            width             : 344px;
+            height            : 612px;
+            background-image  : url("images/bg_344x612.png");
+            background-repeat : no-repeat;
+        }
+
+        video {
+            position : absolute;
+            top      : 0;
+            left     : 0;
+            width    : 344px;
+            height   : 612px;
+        }
+
+        canvas {
+            position : absolute;
+            top      : 0;
+            left     : 0;
+        }
+    </style>
+</head>
+<body>
+<main>
+    <canvas id="myCanvas" width="344" height="612"></canvas>
+</main>
+</body>
+</html>
