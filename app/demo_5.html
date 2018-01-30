@@ -5,69 +5,239 @@
     <title>Demo 3</title>
     <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
     <script>
-        let stage;
-        let queue;
-        let imgFile;
-        let baseParticles = [];
-        let particles = [];
-        let logoImg;
-
         // 読み込みが終わってから初期化
         window.addEventListener ('load', init);
 
+        // CONST
+        const NAME_OF_CANVAS = 'myCanvas';
+        const IMAGE_KEY_OF_QUEUE = 'background';
+        const IMAGE_FILE = 'images/demo_logo_4.png';
+        const stageNamePattern = {
+            START    : 0,
+            SHOW     : 1,
+            SHOW_LOGO: 2,
+            WAIT     : 3,
+            DISAPPEAR: 4,
+            END      : 5,
+        };
+
+        /**
+         * init
+         */
         function init () {
             // 初期化
-            stage = new createjs.Stage ('myCanvas');
+            setStage (NAME_OF_CANVAS);
 
             // LoadQueue
+            setQueue (IMAGE_KEY_OF_QUEUE, IMAGE_FILE, loadQueueComplete);
+        }
+
+        /**
+         * getter setter
+         **/
+        let stage;
+
+        function setStage (name) {
+            stage = new createjs.Stage (name);
+        }
+
+        function getStage () {
+            return stage;
+        }
+
+        function getCanvas () {
+            return stage.canvas;
+        }
+
+        let queue;
+
+        function setQueue (id, src, callback) {
             queue = new createjs.LoadQueue ();
-            queue.on ('complete', loadQueueComplete);
-            queue.loadManifest ([{id: 'background', src: 'images/demo_logo_4.png'}], true);
+            queue.on ('complete', callback);
+            queue.loadManifest ([{id: id, src: src}], true);
+        }
+
+        function getQueue () {
+            return queue;
+        }
+
+        function getImageFromQueue (key) {
+            return getQueue ().getResult (key);
+        }
+
+        let baseParticles = [];
+
+        function setParticlesOptions (array) {
+            baseParticles = array;
+        }
+
+        function getParticleOptions () {
+            return baseParticles;
+        }
+
+        let particles = [];
+
+        function setParticles (array) {
+            particles = array;
+        }
+
+        function getParticles () {
+            return particles;
+        }
+
+        let logo;
+
+        function setLogo (obj) {
+            logo = obj;
+        }
+
+        function getLogo () {
+            return logo;
         }
 
         /**
          * loadQueueComplete
          * 画像読み込み終わり
          */
-        let canvas;
-
         function loadQueueComplete () {
+            setLogo (getImageFromQueue (IMAGE_KEY_OF_QUEUE));
 
-            canvas = document.getElementById ('myCanvas');
+            const canvas = getCanvas ();
             const context = canvas.getContext ('2d');
+            const stage = getStage ();
 
-            imgFile = queue.getResult ('background');
+            // 読み込ませたイメージの取得
+            const imgFile = getLogo ();
 
-            // 一度画像をstage上に表示する
+            // 読み込ませたイメージを表示
             const logoImg = new createjs.Bitmap (imgFile);
-
-            // ロゴ画像表示
             stage.addChild (logoImg);
             stage.update ();
 
             // canvasから画像データを取得
             const logoImgMamp = context.getImageData (0, 0, imgFile.width, imgFile.height);
-            createLocationData (logoImgMamp, canvas);
+            setParticlesOptions (createParticleOptions (logoImgMamp.data));
 
+            // 読み込ませたイメージを非表示
             stage.removeChild (logoImg);
             stage.update ();
 
-            // LogoをaddChild
-            createLogoImage ();
+            // 元画像を画面centerに寄せ透明にする
+            logoImg.x = (canvas.width / 2) - (imgFile.width / 2);
+            logoImg.y = (canvas.height / 2) - (imgFile.height / 2);
+            logoImg.alpha = 0;
+            setLogo (logoImg);
 
-            // babble particle
-            const particleStage = createBabbleParticles ();
-            stage.addChild (particleStage);
+            // 泡パーティクルを作成
+            const particles = createBabbleParticles ();
+            stage.addChild (particles);
 
+            // Tick
             createjs.Ticker.addEventListener ('tick', mainLoop);
         }
 
-        const stageNamePattern = {
-            START: 0,
-            SHOW : 1,
-            MOVE : 2
-        };
+        /**
+         * Create Location Data
+         * @returns {Array}
+         * @param imgData
+         */
+        function createParticleOptions (imgData) {
+            const canvas = getCanvas ();
 
+            // イメージの幅と高さ
+            const imgFile = getImageFromQueue (IMAGE_KEY_OF_QUEUE);
+            const width = imgFile.width;
+            const height = imgFile.height;
+
+            //
+            const particle_options = [];
+
+            //
+            const detailXY = {
+                X: 3,
+                Y: 3,
+            };
+
+            let y = 0;
+            while (y < height) {
+                let x = 0;
+                while (x < width) {
+                    // 配列の格納順が [r, g, b, alpha, r, g, b, alpha...] という順番で格納されているので、4つ分ずらしている。
+                    const index = (x + y * width) * 4;
+
+                    const buket = {
+                        x     : x + (canvas.width / 2) - (imgFile.width / 2),
+                        y     : y + (canvas.height / 2) - (imgFile.height / 2),
+                        baseX : x,
+                        baseY : y,
+                        r     : imgData[index],
+                        g     : imgData[index + 1],
+                        b     : imgData[index + 2],
+                        alpha : imgData[index + 3],
+                        tweenX: false,
+                        tweenY: false,
+                        scale : 1,
+                        bound : false
+                    };
+
+                    /**
+                     * 透明の場合、RGBAともに0で来る
+                     * その場合は、パーティクルを生成しない
+                     */
+                    if (buket.r === 0 && buket.g === 0 && buket.b === 0 && buket.alpha === 0) {
+                    } else {
+                        particle_options.push (buket);
+                    }
+
+                    x += detailXY.X;
+                }
+
+                y += detailXY.Y;
+            }
+
+            return particle_options;
+        }
+
+        /**
+         * createBabbleParticles
+         */
+        function createBabbleParticles () {
+            const container = new createjs.Container ();
+            const particleOptions = getParticleOptions ();
+            const particles = getParticles ();
+
+            for (let i = 0; i < particleOptions.length; i = i + 1) {
+                const option = particleOptions[i];
+                const particle = new createjs.Shape ();
+
+                particle.no = i;
+
+                particle.x = option.x;
+                particle.y = option.y;
+
+                particle.scaleX = 0;
+                particle.scaleY = 0;
+
+                particle.graphics
+                    .beginFill (`rgba(${option.r}, ${option.g}, ${option.b}, 1)`)
+                    .drawCircle (0, 0, 1);
+                //.drawRect(0,0,1,1);
+
+                // パーティクル登録
+                particles.push (particle);
+
+                // containerに登録
+                container.addChild (particle);
+            }
+
+            setParticles (particles);
+
+            return container;
+        }
+
+        /**
+         * animation control
+         **/
         let stageName = stageNamePattern.START;
 
         function mainLoop () {
@@ -76,225 +246,176 @@
                     // 表示
                     showParticles ();
                     break;
-                case stageNamePattern.MOVE:
-                // 動く
-                // moveParticles ();
+
+                case stageNamePattern.SHOW_LOGO:
+                    showLogo ();
+                    break;
+
+                case stageNamePattern.WAIT:
+                    waitLogo ();
+                    break;
+
+                case stageNamePattern.DISAPPEAR:
+                    disappear ();
+                    break;
             }
             stage.update ();
             return isClick = false;
         }
 
-        // 解析の詳細度
-        const detailX = 3;
-        const detailY = 3;
+        /**
+         * disappear
+         **/
+        function disappear () {
+            if (stageName === stageNamePattern.DISAPPEAR) {
 
+                // stageName 変更
+                stageName = stageNamePattern.SHOW;
+
+                //
+                const logo = getLogo ();
+                createjs.Tween.get (logo)
+                    .to ({alpha: 0}, 250);
+
+                //
+                let showedCount = 0;
+                const particles = getParticles ();
+                const particleOptions = getParticleOptions ();
+                for (let i = 0; i < particles.length; i = i + 1) {
+                    const particle = particles[i];
+
+                    particle.scaleX = 1;
+                    particle.scaleY = 1;
+
+                    createjs.Tween.get (particle)
+                        .wait (getRandomInt (1, 500))
+                        .to ({
+                                 x     : getRandomInt (particleOptions[i].x - 10, particleOptions[i].x + 10),
+                                 y     : particleOptions[i].y - 50,
+                                 scaleX: 0,
+                                 scaleY: 0,
+                             }, 500, createjs.Ease.cubicIn)
+                        .call (() => {
+                            showedCount++;
+
+                            // すべてのパーティクルの表示が終わったら
+                            if (showedCount === particles.length) {
+                                stageName = stageNamePattern.END;
+                            }
+                        });
+                }
+
+            }
+        }
+
+        /**
+         * wait logo
+         **/
+        function waitLogo () {
+            if (stageName === stageNamePattern.WAIT) {
+
+                // stageName 変更
+                stageName = stageNamePattern.SHOW;
+
+                setTimeout (() => {
+                    console.log ('bar');
+                    stageName = stageNamePattern.DISAPPEAR;
+                }, 500);
+            }
+        }
+
+        /**
+         * show logo
+         **/
+        function showLogo () {
+            if (stageName === stageNamePattern.SHOW_LOGO) {
+
+                // stageName 変更
+                stageName = stageNamePattern.SHOW;
+
+                //
+                const logo = getLogo ();
+                logo.alpha = 1.0;
+
+                //
+                const stage = getStage ();
+                stage.addChild (logo);
+                stage.update ();
+
+                //
+                let showedCount = 0;
+                const particles = getParticles ();
+                for (let i = 0; i < particles.length; i = i + 1) {
+                    const particle = particles[i];
+
+                    createjs.Tween.get (particle)
+                        .wait (getRandomInt (1, 500))
+                        .to ({scaleX: 0, scaleY: 0}, 500)
+                        .call (() => {
+                            showedCount++;
+
+                            // すべてのパーティクルの表示が終わったら
+                            if (showedCount === particles.length) {
+                                stageName = stageNamePattern.WAIT;
+                            }
+                        });
+                }
+            }
+        }
+
+        /**
+         * Show Particles
+         **/
         function showParticles () {
-            let circle, i, index, len, particleCount, results, scale;
-            let particleCount1 = 0;
-            let particleCount2 = 0;
-            let particleCount3 = 0;
-
-            let isLogo = false;
-
             if (stageName === stageNamePattern.START) {
 
                 // stageName 変更
                 stageName = stageNamePattern.SHOW;
 
-                particleCount = 0;
-                results = [];
-
                 // パーティクルの数処理する
-                for (index = i = 0, len = particles.length; i < len; index = ++i) {
-                    circle = particles[index];
+                const particles = getParticles ();
+                const particleOptions = getParticleOptions ();
 
-                    circle.x = getRandomInt (baseParticles[index].x - 10, baseParticles[index].x + 10);
-                    circle.y = baseParticles[index].y + 10;
-                    circle.visible = false;
-                    circle.alpha = 0;
+                let showedCount = 0;
 
-                    circle.scaleX = 0;
-                    circle.scaleY = 0;
+                for (let i = 0; i < particles.length; i = i + 1) {
+                    const particle = particles[i];
 
-                    scale = baseParticles[index].scale;
+                    particle.x = getRandomInt (particleOptions[i].x - 10, particleOptions[i].x + 10);
+                    particle.y = particleOptions[i].y + 10;
+                    particle.visible = false;
+                    particle.alpha = 0;
 
-                    circle.scaleX = scale;
-                    circle.scaleY = scale;
+                    //const scale = getRandomArbitary (1.0, 1.8); // パーティクルの大きさ
+                    const scale = 1;
+
+                    particle.scaleX = scale;
+                    particle.scaleY = scale;
 
                     // 透明度ブレンド
-                    circle.compositeOperation = 'lighter';
-
-                    // 伸ばす
-                    if (getRandomInt (1, 10) === 10) {
-                        baseParticles[index].y = baseParticles[index].y - 10;
-                    }
+                    particle.compositeOperation = 'lighter';
 
                     // 動き
-                    results.push (
-                        createjs.Tween.get (circle)
-                            .wait (getRandomInt (1, 2000))
-                            .to ({visible: true})
-                            .to ({
-                                     x    : baseParticles[index].x,
-                                     y    : baseParticles[index].y,
-                                     alpha: 0.8,
-                                 }, 1000, createjs.Ease.cubicIn)
-                            .call (() => {
-                                particleCount1++;
+                    createjs.Tween.get (particle)
+                        .wait (getRandomInt (1, 1000))
+                        .to ({visible: true})
+                        .to ({
+                                 x    : particleOptions[i].x,
+                                 y    : particleOptions[i].y,
+                                 alpha: 1.0,
+                             }, 500, createjs.Ease.cubicIn)
+                        .call (() => {
+                            showedCount++;
 
-                                // すべてのパーティクルの表示が終わったら
-                                if (particleCount1 === parseInt (particles.length / 4) && isLogo === false) {
-
-                                    createjs.Tween.get (logoImg)
-                                        .to ({alpha: 1}, 3000, createjs.Ease.cubicOut);
-
-                                    //
-                                    isLogo = true;
-                                }
-                            })
-                            .to ({scaleX: 0, scaleY: 0}, 2000, createjs.Ease.circIn)
-                            .wait (getRandomInt (5000, 6000)) // ここで元画像だけがくっきり見える
-                            .to ({
-                                     scaleX: baseParticles[index].scale,
-                                     scaleY: baseParticles[index].scale,
-                                     alpha : 1
-                                 })
-                            .to ({
-                                     x    : getRandomInt (baseParticles[index].x - 10, baseParticles[index].x + 10),
-                                     y    : baseParticles[index].y - 50,
-                                     alpha: 0
-                                 },
-                                 1000,
-                                 createjs.Ease.cubicIn
-                            )
-                            .call (() => {
-                                // すべてのパーティクルの表示が終わったら
-                                if (logoImg) {
-                                    createjs.Tween.get (logoImg)
-                                        .to ({alpha: 0}, 3000, createjs.Ease.backIn);
-                                }
-                            })
-                            .call (
-                                function () {
-                                    particleCount++;
-
-                                    // すべてのパーティクルの表示が終わったら
-                                    if (particleCount === particles.length) {
-                                        return setTimeout (function () {
-                                            return stageName = stageNamePattern.MOVE;
-                                        }, 100);
-                                    }
-                                }
-                            )
-                    );
+                            // すべてのパーティクルの表示が終わったら
+                            if (showedCount === particles.length) {
+                                stageName = stageNamePattern.SHOW_LOGO;
+                            }
+                        });
                 }
-                return results;
             }
         }
 
-        /**
-         * Create Location Data
-         * @param imgMap
-         * @param canvas
-         * @returns {Array}
-         */
-        function createLocationData (imgMap, canvas) {
-            let buket, height, imgData, index, width, x, y;
-
-            // canvas data
-            imgData = imgMap.data;
-
-            // イメージの幅と高さ
-            width = imgFile.width;
-            height = imgFile.height;
-
-            y = 0;
-            while (y < height) {
-                x = 0;
-                while (x < width) {
-                    // 配列の格納順が [r, g, b, alpha, r, g, b, alpha...] という順番で格納されているので、4つ分ずらしている。
-                    index = (x + y * width) * 4;
-
-                    // rgbの合計値が700以下のピクセルだった場合に取得
-                    if (7000 > imgData[index + 0] + imgData[index + 1] + imgData[index + 2]) {
-                        buket = {
-                            x     : x + (canvas.width / 2) - (imgFile.width / 2),
-                            y     : y + (canvas.height / 2) - (imgFile.height / 2),
-                            baseX : x,
-                            baseY : y,
-                            r     : imgData[index + 0],
-                            g     : imgData[index + 1],
-                            b     : imgData[index + 2],
-                            alpha : imgData[index + 3],
-                            tweenX: false,
-                            tweenY: false,
-                            scale : getRandomArbitary (0.3, 1.8), // パーティクルの大きさ
-                            bound : false
-                        };
-
-                        /**
-                         * 透明の場合、RGBAともに0で来る
-                         * その場合は、パーティクルを生成しない
-                         */
-                        if (buket.r === 0 && buket.g === 0 && buket.b === 0 && buket.alpha === 0) {
-                        } else {
-                            baseParticles.push (buket);
-                        }
-                    } else {
-
-                    }
-
-                    /**
-                     * X 軸の粒度
-                     */
-                    x += detailX;
-                }
-
-                /**
-                 * Y 軸の粒度
-                 */
-                y += detailY;
-            }
-        }
-
-        function createLogoImage () {
-            logoImg = new createjs.Bitmap (imgFile);
-
-            logoImg.x = (canvas.width / 2) - (imgFile.width / 2);
-            logoImg.y = (canvas.height / 2) - (imgFile.height / 2);
-
-            logoImg.alpha = 0;
-
-            stage.addChild (logoImg);
-        }
-
-        /**
-         * createBabbleParticles
-         */
-        function createBabbleParticles () {
-            let circle, i, index, len, local, rgba;
-
-            const particleStage = new createjs.Container ();
-
-            for (index = i = 0, len = baseParticles.length; i < len; index = ++i) {
-                local = baseParticles[index];
-
-                circle = new createjs.Shape ();
-                circle.no = index;
-                circle.x = local.x;
-                circle.y = local.y;
-                circle.scaleX = 0;
-                circle.scaleY = 0;
-
-                rgba = `rgba(${local.r}, ${local.g}, ${local.b}, 1)`;
-
-                circle.graphics.beginFill (rgba).drawCircle (0, 0, 2);
-                particles.push (circle);
-                particleStage.addChild (circle);
-            }
-
-            return particleStage;
-        }
 
         /**
          * 乱数発生
@@ -318,8 +439,6 @@
 
         function getGalsRandomInt (val) {
             const x = Math.random () * Math.random () * Math.random () * Math.random () * Math.random () * Math.random () / 6;
-
-            console.log (Math.floor (x * (val - 1 + 1)) + 1);
 
             return Math.floor (x * (val - 1 + 1)) + 1;
         }
