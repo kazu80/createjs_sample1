@@ -95,6 +95,16 @@
             return logo;
         }
 
+        let tweenUpDown = [];
+
+        function setTweenUpDown (val) {
+            tweenUpDown.push (val);
+        }
+
+        function getTweenUpDown () {
+            return tweenUpDown;
+        }
+
         /**
          * loadQueueComplete
          * 画像読み込み終わり
@@ -154,8 +164,8 @@
 
             //
             const detailXY = {
-                X: 3,
-                Y: 3,
+                X: 2,
+                Y: 2,
             };
 
             let y = 0;
@@ -206,6 +216,8 @@
             const particleOptions = getParticleOptions ();
             const particles = getParticles ();
 
+            particleOptions.sort (() => Math.random () - .5);
+
             for (let i = 0; i < particleOptions.length; i = i + 1) {
                 const option = particleOptions[i];
                 const particle = new createjs.Shape ();
@@ -220,7 +232,7 @@
 
                 particle.graphics
                     .beginFill (`rgba(${option.r}, ${option.g}, ${option.b}, 1)`)
-                    .drawCircle (0, 0, 1);
+                    .drawCircle (0, 0, 0.5);
                 //.drawRect(0,0,1,1);
 
                 // パーティクル登録
@@ -284,17 +296,19 @@
                 for (let i = 0; i < particles.length; i = i + 1) {
                     const particle = particles[i];
 
-                    particle.scaleX = 1;
-                    particle.scaleY = 1;
+                    const scale = getRandomArbitary (0.5, 3.5); // パーティクルの大きさ
+                    particle.scaleX = scale;
+                    particle.scaleY = scale;
 
-                    createjs.Tween.get (particle)
+                    createjs.Tween.get (particle, {loop: false})
                         .wait (getRandomInt (1, 500))
                         .to ({
                                  x     : getRandomInt (particleOptions[i].x - 10, particleOptions[i].x + 10),
                                  y     : particleOptions[i].y - 50,
                                  scaleX: 0,
                                  scaleY: 0,
-                             }, 500, createjs.Ease.cubicIn)
+                             }, 1000, createjs.Ease.cubicIn)
+                        .set ({visible: false})
                         .call (() => {
                             showedCount++;
 
@@ -318,9 +332,8 @@
                 stageName = stageNamePattern.SHOW;
 
                 setTimeout (() => {
-                    console.log ('bar');
                     stageName = stageNamePattern.DISAPPEAR;
-                }, 500);
+                }, 1000);
             }
         }
 
@@ -333,24 +346,28 @@
                 // stageName 変更
                 stageName = stageNamePattern.SHOW;
 
-                //
+                // Logo Image
                 const logo = getLogo ();
-                logo.alpha = 1.0;
 
-                //
+                // Stageに追加
                 const stage = getStage ();
                 stage.addChild (logo);
                 stage.update ();
+                stage.setChildIndex (logo, 0);
 
-                //
+                // ロゴ表示
+                const speed = 800;
+                createjs.Tween.get (logo)
+                    .to ({alpha: 1}, speed);
+
+                // 泡を消す
                 let showedCount = 0;
                 const particles = getParticles ();
                 for (let i = 0; i < particles.length; i = i + 1) {
                     const particle = particles[i];
 
                     createjs.Tween.get (particle)
-                        .wait (getRandomInt (1, 500))
-                        .to ({scaleX: 0, scaleY: 0}, 500)
+                        .to ({scaleX: 0, scaleY: 0}, speed)
                         .call (() => {
                             showedCount++;
 
@@ -382,12 +399,12 @@
                     const particle = particles[i];
 
                     particle.x = getRandomInt (particleOptions[i].x - 10, particleOptions[i].x + 10);
-                    particle.y = particleOptions[i].y + 10;
+                    particle.y = particleOptions[i].y + 30;
                     particle.visible = false;
                     particle.alpha = 0;
 
-                    //const scale = getRandomArbitary (1.0, 1.8); // パーティクルの大きさ
-                    const scale = 1;
+                    const scale = getRandomArbitary (0.5, 3.5); // パーティクルの大きさ
+                    //const scale = 1;
 
                     particle.scaleX = scale;
                     particle.scaleY = scale;
@@ -396,14 +413,16 @@
                     particle.compositeOperation = 'lighter';
 
                     // 動き
+                    const speed = getRandomInt (1, 2000);
+
                     createjs.Tween.get (particle)
-                        .wait (getRandomInt (1, 1000))
-                        .to ({visible: true})
+                        .wait (speed)
+                        .set ({visible: true})
                         .to ({
                                  x    : particleOptions[i].x,
                                  y    : particleOptions[i].y,
-                                 alpha: 1.0,
-                             }, 500, createjs.Ease.cubicIn)
+                                 alpha: getRandomArbitary (0.8, 1.0),
+                             }, speed)
                         .call (() => {
                             showedCount++;
 
@@ -412,6 +431,14 @@
                                 stageName = stageNamePattern.SHOW_LOGO;
                             }
                         });
+
+                    particle.y = particleOptions[i];
+                    const tween = createjs.Tween.get (particle, {loop: true})
+                        .to ({y: particleOptions[i].y + 2}, getRandomInt (400, 1600))
+                        .to ({y: particleOptions[i].y - 2}, getRandomInt (400, 1600))
+                        .to ({y: particleOptions[i].y}, getRandomInt (400, 1600));
+
+                    setTweenUpDown (tween);
                 }
             }
         }
