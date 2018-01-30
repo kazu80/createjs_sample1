@@ -331,6 +331,14 @@
                 // stageName 変更
                 stageName = stageNamePattern.SHOW;
 
+                // アップダウンエフェクトの解除
+                const tweenUpDown = getTweenUpDown ();
+                for (let i = 0; i < tweenUpDown.length; i++) {
+                    const tween = tweenUpDown[i];
+                    tween.paused = true;
+                    tween.setPaused (true);
+                }
+
                 setTimeout (() => {
                     stageName = stageNamePattern.DISAPPEAR;
                 }, 1000);
@@ -403,8 +411,7 @@
                     particle.visible = false;
                     particle.alpha = 0;
 
-                    const scale = getRandomArbitary (0.5, 3.5); // パーティクルの大きさ
-                    //const scale = 1;
+                    const scale = getRandomArbitary (0.5, 4.5); // パーティクルの大きさ
 
                     particle.scaleX = scale;
                     particle.scaleY = scale;
@@ -443,7 +450,6 @@
             }
         }
 
-
         /**
          * 乱数発生
          * @param min
@@ -481,8 +487,10 @@
             margin            : 20px;
             width             : 344px;
             height            : 612px;
+            /*
             background-image  : url("images/bg_344x612.png");
             background-repeat : no-repeat;
+            */
         }
 
         video {
@@ -502,6 +510,7 @@
 </head>
 <body>
 <main>
+    <video src="images/movie_2.mp4" width="344" height="612" autoplay loop></video>
     <canvas id="myCanvas" width="344" height="612"></canvas>
 </main>
 </body>
