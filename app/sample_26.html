@@ -36,7 +36,7 @@
             // パーティクルを発生させます
             function emitParticles () {
                 // パーティクルの生成
-                for (let i = 0; i < 4; i++) {
+                for (let i = 0; i < 1; i++) {
                     // オブジェクトの生成
                     const particle = new createjs.Shape ();
                     particle.graphics
@@ -45,16 +45,16 @@
                     stage.addChild (particle);
 
                     // パーティクルの発生場所
-                    particle.x = stage.mouseX;
-                    particle.y = stage.mouseY;
+                    particle.x = 100;
+                    particle.y = stage.canvas.height - 20;
 
                     // 動的にプロパティを追加します
                     // 速度
-                    particle.vx = 10 * (Math.random () - 0.5);
-                    particle.vy = 10 * (Math.random () - 0.5);
+                    particle.vx = 3 * (Math.random () - 0.5);
+                    particle.vy = 5 * (Math.random () - 0.5);
 
                     // 寿命
-                    particle.life = 100;
+                    particle.life = 30;
 
                     particles.push (particle);
                 }
@@ -68,7 +68,7 @@
                     const particle = particles[i];
 
                     // 重力
-                    particle.vy += 1;
+                    particle.vy -= 1;
 
                     // 摩擦
                     particle.vx *= 0.98;
@@ -79,9 +79,8 @@
                     particle.y += particle.vy;
 
                     // 地面
-                    if (particle.y > stage.canvas.height - size) {
-                        particle.y = stage.canvas.height - size; // 行き過ぎ補正
-                        particle.vy *= -1; // Y軸の速度を反転
+                    if (particle.y < 0) {
+                        particle.life = 0;
                     }
 
                     // 寿命を減らす
@@ -93,7 +92,7 @@
                         stage.removeChild (particle);
 
                         // 配列からも削除
-                        particle.splice (i, 1);
+                        particles.splice (i, 1);
                     }
                 }
             }
@@ -101,7 +100,7 @@
             // 初期値の上書き
             // 画面の中央からパーティクルが表示するよう強制的に設定
             stage.mouseX = stage.canvas.width / 2;
-            stage.mouseY = stage.canvas.height * 1 / 3;
+            stage.mouseY = stage.canvas.height / 0.5;
         }
     </script>
 </head>
