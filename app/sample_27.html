@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample 27</title>
+    <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+    <script>
+        // 読み込みが終わってから初期化
+        window.addEventListener ('load', init);
+
+        function init () {
+            // 初期化
+            const stage = new createjs.Stage ('myCanvas');
+
+            // Mask
+            const container = new createjs.Container ();
+
+            const mask = new createjs.Shape ();
+            mask.graphics
+                .beginFill ('blue')
+                .drawRect (50, 50, 200, 40);
+
+            // SVG
+            const svgImage = new createjs.Bitmap ('images/logo.svg');
+            // container.addChild(svgImage);
+
+            //container.addChild(mask);
+
+            var g = new createjs.Graphics ();
+            g.setStrokeStyle (1);
+            g.beginStroke (createjs.Graphics.getRGB (0, 0, 0));
+            g.beginFill (createjs.Graphics.getRGB (255, 0, 0));
+            g.drawCircle (0, 0, 30);
+
+            var s = new createjs.Shape (g);
+            s.x = 100;
+            s.y = 100;
+
+            stage.addChild (s);
+            stage.update ();
+
+            // 円の作成
+            const circle = new createjs.Shape ();
+            circle.graphics.beginFill ('DarkRed').drawCircle (100, 100, 80);
+
+            circle.mask = svgImage;
+
+            //stage.addChild (circle);
+
+            stage.update ();
+        }
+    </script>
+    <style>
+        body {
+            background-color : #c1eef4;
+        }
+    </style>
+</head>
+<body>
+<canvas id="myCanvas" width="640" height="200"></canvas>
+</body>
+</html>
