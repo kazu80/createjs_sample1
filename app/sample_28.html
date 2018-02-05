@@ -18,6 +18,24 @@
             // 初期化
             const stage = new createjs.Stage ('myCanvas');
 
+            // Set Hexagon Pattern
+            setHexagonPattern (stage);
+
+            // mask
+            stage.set ({mask: createMask ()});
+
+            // 時間経過
+            createjs.Ticker.addEventListener ('tick', stage);
+
+            //
+            createjs.Ticker.timingMode = createjs.TickerRAF;
+
+        }
+
+        /**
+         * Hexagon模様を貼る
+         **/
+        function setHexagonPattern (stage) {
             // create particle array
             // create particles option
             const hexagons = [];
@@ -28,14 +46,8 @@
                 for (let i = 0; i < col; i++) {
                     let x = (j % 2 === 0) ? (r * numberX1) * i + (r * numberX2) : (r * numberX1) * i;
 
-                    const hexagon = new createjs.Shape ();
-                    hexagon.graphics
-                        .beginStroke ('green')
-                        .beginFill ('green')
-                        .drawPolyStar (0, 0, r, 6, 0, 30);
-
                     // push particle
-                    hexagons.push (hexagon);
+                    hexagons.push (createHexagon ());
 
                     // push option
                     options.push ({x: x, y: y});
@@ -69,24 +81,32 @@
                          }, 600);
             }
 
-            // mask
+        }
+
+        /**
+         * Create Hexagon particle
+         **/
+        function createHexagon () {
+            const hexagon = new createjs.Shape ();
+            hexagon.graphics
+                .beginStroke ('green')
+                .beginFill ('green')
+                .drawPolyStar (0, 0, r, 6, 0, 30);
+
+            return hexagon;
+        }
+
+        /**
+         * Set Mask
+         **/
+        function createMask () {
             const maskShape = new createjs.Shape ();
             maskShape.set ({
                                x       : 50,
                                y       : 50,
                                graphics: logo (),
                            });
-
-            // set
-            stage.set ({mask: maskShape});
-
-
-            // 時間経過
-            createjs.Ticker.addEventListener ('tick', stage);
-
-            //
-            createjs.Ticker.timingMode = createjs.TickerRAF;
-
+            return maskShape;
         }
 
         /**
