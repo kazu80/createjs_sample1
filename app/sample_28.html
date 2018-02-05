@@ -15,7 +15,7 @@
             const stage = new createjs.Stage ('myCanvas');
 
             // particle array
-            const hexagon = [];
+            const hexagons = [];
             const options = [];
 
             for (let j = 0; j < 10; j++) {
@@ -24,38 +24,48 @@
                 for (let i = 0; i < 20; i++) {
                     let x = (j % 2 === 0) ? (r * 1.732) * i + (r * 0.858) : (r * 1.732) * i;
 
-                    const square = new createjs.Shape ();
-                    square.graphics
+                    const hexagon = new createjs.Shape ();
+                    hexagon.graphics
                         .beginStroke ('green')
                         .beginFill ('green')
-                        .drawPolyStar (x, y, r, 6, 0, 30);
-                    stage.addChild (square);
+                        .drawPolyStar (0, 0, r, 6, 0, 30);
+
+                    //
+                    hexagons.push (hexagon);
 
                     //
                     options.push ({
                                       x: x,
                                       y: y,
                                   });
-                    hexagon.push (square);
                 }
             }
 
-            // Animation
-            for (let i = 0; i < hexagon.length; i++) {
-                const particle = hexagon[i];
+            for (let i = 0; i < hexagons.length; i++) {
+                const hexagon = hexagons[i];
                 const option = options[i];
 
-                particle.x = option.x;
-                particle.y = option.y;
-                particle.scaleX = 0.1;
-                particle.scaleY = 0.1;
+                hexagon.x = option.x;
+                hexagon.y = option.y;
 
-                createjs.Tween.get (particle)
-                    .wait (getRandomInt (0, 1000))
+                stage.addChild (hexagon);
+            }
+
+            // Animation
+            for (let i = 0; i < hexagons.length; i++) {
+                const hexagon = hexagons[i];
+
+                createjs.Tween.get (hexagon, {loop: true})
+                    .wait (getRandomInt (0, 5000))
+                    .to ({
+                             scaleX: 0,
+                             scaleY: 0,
+                         }, 1000)
+                    .wait (getRandomInt (0, 5000))
                     .to ({
                              scaleX: 1.0,
                              scaleY: 1.0,
-                         }, 5000);
+                         }, 1000);
             }
 
             // 時間経過
