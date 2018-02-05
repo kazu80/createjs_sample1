@@ -8,7 +8,7 @@
         // 読み込みが終わってから初期化
         window.addEventListener ('load', init);
 
-        const r = 20;
+        const r = 5;
 
         function init () {
             // 初期化
@@ -18,7 +18,7 @@
             const hexagons = [];
             const options = [];
 
-            for (let j = 0; j < 10; j++) {
+            for (let j = 0; j < 30; j++) {
                 const y = (r * 1.5) * j;
 
                 for (let i = 0; i < 20; i++) {
@@ -55,18 +55,30 @@
             for (let i = 0; i < hexagons.length; i++) {
                 const hexagon = hexagons[i];
 
-                createjs.Tween.get (hexagon, {loop: true})
-                    .wait (getRandomInt (0, 5000))
-                    .to ({
-                             scaleX: 0,
-                             scaleY: 0,
-                         }, 1000)
-                    .wait (getRandomInt (0, 5000))
+                hexagon.scaleX = 0;
+                hexagon.scaleY = 0;
+
+                createjs.Tween.get (hexagon)
+                    .wait (getRandomInt (0, 2000))
                     .to ({
                              scaleX: 1.0,
                              scaleY: 1.0,
                          }, 1000);
             }
+
+            // mask
+            const maskShape = new createjs.Shape ();
+
+            maskShape.set ({
+                               x       : 50,
+                               y       : 50,
+                               graphics: new createjs.Graphics ().beginFill ('#FFF').drawRect (20, 20, 25, 100)
+                           });
+
+            stage.set ({
+                           mask: maskShape
+                       });
+
 
             // 時間経過
             createjs.Ticker.addEventListener ('tick', stage);
