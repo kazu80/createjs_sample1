@@ -9,20 +9,24 @@
         window.addEventListener ('load', init);
 
         const r = 7;
+        const raw = 40;
+        const col = 45;
+        const numberX1 = 1.732;
+        const numberX2 = 0.858;
 
         function init () {
             // 初期化
             const stage = new createjs.Stage ('myCanvas');
 
-            // particle array
+            // create particle array
+            // create particles option
             const hexagons = [];
             const options = [];
-
-            for (let j = 0; j < 40; j++) {
+            for (let j = 0; j < raw; j++) {
                 const y = (r * 1.5) * j;
 
-                for (let i = 0; i < 45; i++) {
-                    let x = (j % 2 === 0) ? (r * 1.732) * i + (r * 0.858) : (r * 1.732) * i;
+                for (let i = 0; i < col; i++) {
+                    let x = (j % 2 === 0) ? (r * numberX1) * i + (r * numberX2) : (r * numberX1) * i;
 
                     const hexagon = new createjs.Shape ();
                     hexagon.graphics
@@ -30,17 +34,16 @@
                         .beginFill ('green')
                         .drawPolyStar (0, 0, r, 6, 0, 30);
 
-                    //
+                    // push particle
                     hexagons.push (hexagon);
 
-                    //
-                    options.push ({
-                                      x: x,
-                                      y: y,
-                                  });
+                    // push option
+                    options.push ({x: x, y: y});
                 }
             }
 
+            // Init particle
+            // Add particle to stage
             for (let i = 0; i < hexagons.length; i++) {
                 const hexagon = hexagons[i];
                 const option = options[i];
@@ -68,16 +71,14 @@
 
             // mask
             const maskShape = new createjs.Shape ();
-
             maskShape.set ({
                                x       : 50,
                                y       : 50,
                                graphics: logo (),
                            });
 
-            stage.set ({
-                           mask: maskShape
-                       });
+            // set
+            stage.set ({mask: maskShape});
 
 
             // 時間経過
