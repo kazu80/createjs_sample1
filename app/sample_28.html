@@ -17,17 +17,73 @@
         function init () {
             // 初期化
             const stage = new createjs.Stage ('myCanvas');
+            const container = new createjs.Container ();
 
             // Set Hexagon Pattern
-            setHexagonPattern (stage);
+            setHexagonPattern (container);
 
             // mask
-            stage.set ({mask: createMask ()});
+            container.set ({mask: createMask ()});
+
+            // container on stage
+            stage.addChild (container);
+
+            //
+            const flyHexagons = [];
+            for (let i = 0; i < 80; i++) {
+                flyHexagons.push (createHexagon ('green'));
+            }
+
+            for (let i = 0; i < flyHexagons.length; i++) {
+                const hexagon = flyHexagons[i];
+
+                switch (i % 3) {
+                    case 0:
+                        hexagon.x = getRandomInt (50, 350);
+                        hexagon.y = getRandomInt (50, 110);
+                        break;
+                    case 1:
+                        hexagon.x = getRandomInt (50, 500);
+                        hexagon.y = getRandomInt (180, 250);
+                        break;
+                    case 2:
+                        hexagon.x = getRandomInt (50, 300);
+                        hexagon.y = getRandomInt (310, 360);
+                        break;
+                }
+                stage.addChild (hexagon);
+            }
+
+            //
+            for (let i = 0; i < flyHexagons.length; i++) {
+                const hexagon = flyHexagons[i];
+
+                hexagon.scaleX = 0;
+                hexagon.scaleY = 0;
+
+                createjs.Tween.get (hexagon)
+                    .wait (getRandomIntBias (200, 2500))
+                    .to ({
+                             scaleX: 1.0,
+                             scaleY: 1.0,
+                         }, 200)
+                    .to ({
+                             x: getRandomInt (hexagon.x + 5, hexagon.x + 20),
+                             y: getRandomInt (hexagon.y - 5, hexagon.y - 10)
+                         }, 200)
+                    .to ({
+                             x     : getRandomInt (hexagon.x + 20, hexagon.x + 80),
+                             y     : getRandomInt (hexagon.y - 50, hexagon.y - 10),
+                             scaleX: 0,
+                             scaleY: 0,
+                         }, 600);
+            }
+
 
             // 時間経過
             createjs.Ticker.addEventListener ('tick', stage);
 
-            //
+            // 60FPS
             createjs.Ticker.timingMode = createjs.TickerRAF;
 
         }
@@ -47,7 +103,7 @@
                     let x = (j % 2 === 0) ? (r * numberX1) * i + (r * numberX2) : (r * numberX1) * i;
 
                     // push particle
-                    hexagons.push (createHexagon ());
+                    hexagons.push (createHexagon ('green'));
 
                     // push option
                     options.push ({x: x, y: y});
@@ -74,11 +130,11 @@
                 hexagon.scaleY = 0;
 
                 createjs.Tween.get (hexagon)
-                    .wait (getRandomInt (0, 3000))
+                    .wait (getRandomIntBias (0, 3000))
                     .to ({
                              scaleX: 1.0,
                              scaleY: 1.0,
-                         }, 600);
+                         }, 600, createjs.Ease.cubicIn);
             }
 
         }
@@ -86,11 +142,11 @@
         /**
          * Create Hexagon particle
          **/
-        function createHexagon () {
+        function createHexagon (color) {
             const hexagon = new createjs.Shape ();
             hexagon.graphics
-                .beginStroke ('green')
-                .beginFill ('green')
+                .beginStroke (color)
+                .beginFill (color)
                 .drawPolyStar (0, 0, r, 6, 0, 30);
 
             return hexagon;
@@ -580,6 +636,22 @@
          */
         function getRandomInt (min, max) {
             return Math.floor (Math.random () * (max - min + 1)) + min;
+        }
+
+        function getRandomIntBias (min, max) {
+            return Math.floor (calcNormal () * (max - min + 1)) + min;
+        }
+
+        function calcNormal () {
+            // 正規乱数
+            const r1 = Math.random ();
+            const r2 = Math.random ();
+            let value = Math.sqrt (-2.0 * Math.log (r1)) * Math.sin (2.0 * Math.PI * r2);
+
+            // 値を0以上1未満になるよう正規化する
+            value = (value + 3) / 6;
+
+            return value;
         }
 
     </script>
