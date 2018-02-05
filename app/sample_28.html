@@ -13,6 +13,8 @@
         const col = 45;
         const numberX1 = 1.732;
         const numberX2 = 0.858;
+        const flyCount = 80;
+        const color = 'green';
 
         function init () {
             // 初期化
@@ -28,33 +30,53 @@
             // container on stage
             stage.addChild (container);
 
-            //
+            // Set fly Hexagons
+            setFlyHexagons (stage);
+
+            // 時間経過
+            createjs.Ticker.addEventListener ('tick', stage);
+
+            // 60FPS
+            createjs.Ticker.timingMode = createjs.TickerRAF;
+
+        }
+
+        /**
+         * 飛んできえるパーティクル生成
+         **/
+        function setFlyHexagons (stage) {
+
+            // Fly Hexagons
             const flyHexagons = [];
-            for (let i = 0; i < 80; i++) {
-                flyHexagons.push (createHexagon ('green'));
+            for (let i = 0; i < flyCount; i++) {
+                flyHexagons.push (createHexagon (color));
             }
 
+            // Set XY
             for (let i = 0; i < flyHexagons.length; i++) {
                 const hexagon = flyHexagons[i];
 
-                switch (i % 3) {
+                switch (i % 4) {
                     case 0:
                         hexagon.x = getRandomInt (50, 350);
-                        hexagon.y = getRandomInt (50, 110);
+                        hexagon.y = getRandomInt (50, 120);
                         break;
                     case 1:
-                        hexagon.x = getRandomInt (50, 500);
-                        hexagon.y = getRandomInt (180, 250);
-                        break;
                     case 2:
+                        hexagon.x = getRandomInt (50, 500);
+                        hexagon.y = getRandomInt (170, 240);
+                        break;
+                    case 3:
                         hexagon.x = getRandomInt (50, 300);
-                        hexagon.y = getRandomInt (310, 360);
+                        hexagon.y = getRandomInt (290, 360);
                         break;
                 }
+
+                // Add to Stage
                 stage.addChild (hexagon);
             }
 
-            //
+            // Fly animation
             for (let i = 0; i < flyHexagons.length; i++) {
                 const hexagon = flyHexagons[i];
 
@@ -62,7 +84,7 @@
                 hexagon.scaleY = 0;
 
                 createjs.Tween.get (hexagon)
-                    .wait (getRandomIntBias (200, 2500))
+                    .wait (getRandomIntBias (800, 2500))
                     .to ({
                              scaleX: 1.0,
                              scaleY: 1.0,
@@ -72,20 +94,12 @@
                              y: getRandomInt (hexagon.y - 5, hexagon.y - 10)
                          }, 200)
                     .to ({
-                             x     : getRandomInt (hexagon.x + 20, hexagon.x + 80),
+                             x     : getRandomIntBias (hexagon.x + 20, hexagon.x + 60),
                              y     : getRandomInt (hexagon.y - 50, hexagon.y - 10),
                              scaleX: 0,
                              scaleY: 0,
                          }, 600);
             }
-
-
-            // 時間経過
-            createjs.Ticker.addEventListener ('tick', stage);
-
-            // 60FPS
-            createjs.Ticker.timingMode = createjs.TickerRAF;
-
         }
 
         /**
@@ -103,7 +117,7 @@
                     let x = (j % 2 === 0) ? (r * numberX1) * i + (r * numberX2) : (r * numberX1) * i;
 
                     // push particle
-                    hexagons.push (createHexagon ('green'));
+                    hexagons.push (createHexagon (color));
 
                     // push option
                     options.push ({x: x, y: y});
@@ -653,7 +667,6 @@
 
             return value;
         }
-
     </script>
 </head>
 <body>
