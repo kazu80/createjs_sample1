@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample 29</title>
+    <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+    <script>
+        // 読み込みが終わってから初期化
+        window.addEventListener ('load', init);
+
+        function init () {
+            // 初期化
+            const stage = new createjs.Stage ('myCanvas');
+
+            // 基準線 X
+            const graphicsX = new createjs.Graphics ();
+            graphicsX.beginStroke ('#008');
+            graphicsX.moveTo (stage.canvas.width / 2, 0);
+            graphicsX.lineTo (stage.canvas.width / 2, stage.canvas.height);
+            graphicsX.endStroke ();
+            const lineX = new createjs.Shape (graphicsX);
+            stage.addChild (lineX);
+
+            // 基準線 Y
+            const graphicsY = new createjs.Graphics ();
+            graphicsY.beginStroke ('#800');
+            graphicsY.moveTo (0, stage.canvas.height / 2);
+            graphicsY.lineTo (stage.canvas.width, stage.canvas.height / 2);
+            graphicsY.endStroke ();
+            const lineY = new createjs.Shape (graphicsY);
+            stage.addChild (lineY);
+
+            // 円のシェイプを作成
+            /*
+            const circle = new createjs.Shape();
+            circle.graphics.beginFill("DarkRed").drawCircle(0, 0, 50);
+            circle.x = stage.canvas.width / 2;
+            circle.y = stage.canvas.height / 2;
+            stage.addChild(circle);
+
+            createjs.Tween.get(circle, {loop: true}) // ターゲットを指定
+                .to({
+                        scaleX: 0.1,
+                        scaleY: 0.1,
+                    }, 10000)
+                .to(
+                    {
+                        scaleX: 1.0,
+                        scaleY: 1.0,
+                    }, 10000);
+            */
+
+            // 四角のシェイプ#1を作成
+            /*
+            const rect_1 = new createjs.Shape();
+            rect_1.graphics.beginFill("DarkRed");
+            rect_1.graphics.drawRect(0, 0, 100, 100);
+            rect_1.x = stage.canvas.width / 2 - 50;
+            rect_1.y = stage.canvas.height / 2;
+            rect_1.regX = 50;
+            rect_1.regY = 50;
+            stage.addChild(rect_1);
+
+            createjs.Tween.get(rect_1, {loop: true}) // ターゲットを指定
+                .to({
+                        scaleX: 0.1,
+                        scaleY: 0.1,
+                    }, 1000)
+                .to(
+                    {
+                        scaleX: 1.0,
+                        scaleY: 1.0,
+                    }, 1000);
+
+            // 四角のシェイプ#2を作成
+            const rect_2 = new createjs.Shape();
+            rect_2.graphics.beginFill("DarkRed");
+            rect_2.graphics.drawRect(0, 0, 100, 100);
+            rect_2.x = stage.canvas.width / 2 + 50;
+            rect_2.y = stage.canvas.height / 2;
+            rect_2.regX = 50;
+            rect_2.regY = 50;
+            stage.addChild(rect_2);
+
+            createjs.Tween.get(rect_2, {loop: true}) // ターゲットを指定
+                .to({
+                        scaleX: 0.1,
+                        scaleY: 0.1,
+                    }, 1000)
+                .to(
+                    {
+                        scaleX: 1.0,
+                        scaleY: 1.0,
+                    }, 1000);
+            */
+
+            // ヘキサゴン
+            const r = 20;
+            const hexagons = [];
+            for (let i = 0; i < 3; i++) {
+                const hexagon = new createjs.Shape ();
+                hexagon.graphics
+                    .beginFill ('green')
+                    .drawPolyStar (0, 0, r, 6, 0, 30);
+
+                hexagons.push (hexagon);
+            }
+
+            for (let i = 0; i < hexagons.length; i++) {
+                const hexagon = hexagons[i];
+
+                hexagon.x = stage.canvas.width / 2 + ((r / 2) * 1.732) + (i * (r * 1.732));
+                hexagon.y = stage.canvas.height / 2;
+
+                stage.addChild (hexagon);
+            }
+
+            /*
+            for (let i = 0; i < hexagons.length; i++) {
+                const hexagon = hexagons[i];
+
+                createjs.Tween.get(hexagon, {loop: true}) // ターゲットを指定
+                    .to({
+                            scaleX: 0.1,
+                            scaleY: 0.1,
+                        }, 1000)
+                    .to(
+                        {
+                            scaleX: 1.0,
+                            scaleY: 1.0,
+                        }, 1000);
+            }
+            */
+
+            // ステージを自動更新する
+            createjs.Ticker.addEventListener ('tick', stage);
+            createjs.Ticker.timingMode = createjs.Ticker.RAF;
+        }
+    </script>
+</head>
+<body>
+<div style="margin: 20px">
+    <canvas id="myCanvas" width="640" height="400"></canvas>
+</div>
+</body>
+</html>
