@@ -12,29 +12,51 @@
             // 初期化
             const stage = new createjs.Stage ('myCanvas');
 
-            const circle = new createjs.Shape ();
-            circle.graphics.beginFill ('green').drawCircle (0, 0, 100);
+            const circles = [];
+            for (let i = 0; i < 5; i++) {
+                circles.push (createBubble (250 + i * 80));
+            }
 
-            circle.x = 250;
-            circle.y = 150;
+            for (let i = 0; i < 5; i++) {
+                const circle = circles[i];
 
-            stage.addChild (circle);
-            stage.update ();
+                stage.addChild (circle);
+                stage.update ();
+            }
 
-            const filter = new createjs.ColorFilter (1, 0.7, 1, 1);
-            circle.filters = [filter];
-            circle.cache (-100, -100, 100 * 2, 100 * 2);
+
 
             createjs.Ticker.setFPS (60);
             createjs.Ticker.addEventListener ('tick', function (event) {
-                // console.log('tick');
-                circle.updateCache ();
+                for (let i = 0; i < 5; i++) {
+                    const circle = circles[i];
+                    circle.updateCache ();
+                }
+
                 stage.update (event);
             });
+        }
 
-            const tween = createjs.Tween.get (filter, {loop: true})
+        function createBubble (x) {
+            const circle = new createjs.Shape ();
+            circle.graphics.beginFill ('green').drawCircle (0, 0, 100);
+
+            circle.x = x;
+            circle.y = 150;
+
+            const filter = new createjs.ColorFilter (1, 1, 1, 1);
+            circle.filters = [filter];
+            circle.cache (-100, -100, 100 * 2, 100 * 2);
+
+            createjs.Tween.get (filter, {loop: true})
                 .to ({greenMultiplier: 1.5}, 1000)
                 .to ({greenMultiplier: 0.7}, 1000);
+
+            createjs.Tween.get (circle, {loop: true})
+                .to ({y: 500}, 3000)
+                .to ({y: 150}, 3000);
+
+            return circle;
         }
     </script>
 </head>
