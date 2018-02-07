@@ -12,39 +12,49 @@
             // 初期化
             const stage = new createjs.Stage ('myCanvas');
 
-            // Create Circle
-            const circle = new createjs.Shape ();
 
-            circle.graphics
-                .beginStroke ('rgba(0,0,0,.2)')
-                .setStrokeStyle (1)
-                .drawCircle (0, 0, 150);
-
-            circle.x = stage.canvas.width / 2;
-            circle.y = stage.canvas.height / 2;
 
             // circle.setTransform(circle.x, circle.y, 0.01, 0.01);
 
-            stage.addChild (circle);
-            stage.update ();
+            //stage.addChild (circle);
+            //stage.update ();
 
-            let radius = 15;
+            let radius = 1;
             let alpha = 1;
             let count = 0;
 
+            const above = 30;
+
+            const circleArray = [];
             function tick (event) {
                 radius += 1;
                 alpha -= 0.008;
                 count += 1;
 
-                if (i % 5 === 0) {
+                if (count % above === 0) {
+                    // Create Circle
+                    const circle = new createjs.Shape ();
 
+                    circle.x = stage.canvas.width / 2;
+                    circle.y = stage.canvas.height / 2;
+
+                    //
+                    circleArray.push (circle);
+                    stage.addChild (circle);
                 }
 
-                circle.graphics.clear ()
-                    .beginStroke ('rgba(0,0,0,' + alpha + ')')
-                    .setStrokeStyle (1)
-                    .drawCircle (0, 0, radius);
+                for (let i = 0; i < circleArray.length; i++) {
+                    const circle = circleArray[i];
+
+                    let size = radius - above * i;
+                    let al = alpha + (0.008 * above) * i;
+
+                    circle.graphics.clear ()
+                        .beginStroke ('rgba(25,25,25,' + al + ')')
+                        .setStrokeStyle (1)
+                        .drawCircle (0, 0, size);
+                }
+
 
                 stage.update (event);
             }
