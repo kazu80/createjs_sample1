@@ -22,16 +22,26 @@
             let radius = 1;
             let alpha = 1;
             let count = 0;
+            let tick_count = 0;
+            let speed = 2;
 
-            const above = 30;
+            const above = 20;
+            const alpha_default = 0.008;
 
             const circleArray = [];
-            function tick (event) {
-                radius += 1;
-                alpha -= 0.008;
-                count += 1;
 
-                if (count % above === 0) {
+            function tick (event) {
+                tick_count += 1;
+
+                if (tick_count % speed === 1) {
+                    return;
+                }
+
+                count += 1;
+                radius += 1;
+                alpha -= alpha_default;
+
+                if (count % above === 1) {
                     // Create Circle
                     const circle = new createjs.Shape ();
 
@@ -46,13 +56,17 @@
                 for (let i = 0; i < circleArray.length; i++) {
                     const circle = circleArray[i];
 
-                    let size = radius - above * i;
-                    let al = alpha + (0.008 * above) * i;
+                    let size = radius - (above * i);
+                    let al = alpha + (alpha_default * above) * i;
 
                     circle.graphics.clear ()
                         .beginStroke ('rgba(25,25,25,' + al + ')')
                         .setStrokeStyle (1)
                         .drawCircle (0, 0, size);
+
+                    if (al < 0) {
+
+                    }
                 }
 
 
