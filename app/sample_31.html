@@ -11,38 +11,57 @@
         function init () {
             // 初期化
             const stage = new createjs.Stage ('myCanvas');
+            const container = new createjs.Container ();
 
-            const circles = [];
-            for (let i = 0; i < 5; i++) {
-                circles.push (createBubble (250 + i * 80));
+            const bubbles = [];
+            for (let i = 0; i < 10; i++) {
+                bubbles.push (createBubble (20, 'green'));
             }
 
-            for (let i = 0; i < 5; i++) {
-                const circle = circles[i];
+            for (let i = 0; i < bubbles.length; i++) {
+                const bubble = bubbles[i];
 
-                stage.addChild (circle);
-                stage.update ();
+                //
+                bubble.x = getRandomInt (0, stage.canvas.width);
+                bubble.y = stage.canvas.height + 20;
+
+                // Add container
+                container.addChild (bubble);
+
+                // 昇降
+                createjs.Tween.get (bubble, {loop: true})
+                    .wait (getRandomIntBias (0, 10000))
+                    .to ({
+                             y: 20 * -1,
+                         }, 5000)
+                    .call (() => {
+                        container.removeChild (bubble);
+                    });
             }
 
-
+            stage.addChild (container);
+            stage.update ();
 
             createjs.Ticker.setFPS (60);
             createjs.Ticker.addEventListener ('tick', function (event) {
-                for (let i = 0; i < 5; i++) {
-                    const circle = circles[i];
-                    circle.updateCache ();
+                for (let i = 0; i < bubbles.length; i++) {
+                    const bubble = bubbles[i];
+                    bubble.updateCache ();
                 }
 
                 stage.update (event);
             });
         }
 
-        function createBubble (x) {
+        /**
+         * create bubble
+         * @param size
+         * @param color
+         * @returns {createjs.Shape}
+         */
+        function createBubble (size, color) {
             const circle = new createjs.Shape ();
-            circle.graphics.beginFill ('green').drawCircle (0, 0, 100);
-
-            circle.x = x;
-            circle.y = 150;
+            circle.graphics.beginFill (color).drawCircle (0, 0, size);
 
             const filter = new createjs.ColorFilter (1, 1, 1, 1);
             circle.filters = [filter];
@@ -52,17 +71,49 @@
                 .to ({greenMultiplier: 1.5}, 1000)
                 .to ({greenMultiplier: 0.7}, 1000);
 
-            createjs.Tween.get (circle, {loop: true})
-                .to ({y: 500}, 3000)
-                .to ({y: 150}, 3000);
-
             return circle;
+        }
+
+        /**
+         * 乱数発生
+         * @param min
+         * @param max
+         * @returns {*}
+         */
+        function getRandomArbitary (min, max) {
+            return Math.random () * (max - min) + min;
+        }
+
+        /**
+         * 乱数発生（Integer）
+         * @param min
+         * @param max
+         * @returns {*}
+         */
+        function getRandomInt (min, max) {
+            return Math.floor (Math.random () * (max - min + 1)) + min;
+        }
+
+        function getRandomIntBias (min, max) {
+            return Math.floor (calcNormal () * (max - min + 1)) + min;
+        }
+
+        function calcNormal () {
+            // 正規乱数
+            const r1 = Math.random ();
+            const r2 = Math.random ();
+            let value = Math.sqrt (-2.0 * Math.log (r1)) * Math.sin (2.0 * Math.PI * r2);
+
+            // 値を0以上1未満になるよう正規化する
+            value = (value + 3) / 6;
+
+            return value;
         }
     </script>
 </head>
 <body>
 <main>
-    <canvas id="myCanvas" width="980" height="400"></canvas>
+    <canvas id="myCanvas" width="980" height="800"></canvas>
 </main>
 </body>
 </html>
