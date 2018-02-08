@@ -12,63 +12,69 @@
             // 初期化
             const stage = new createjs.Stage ('myCanvas');
 
+            let radius = 1; // 円の半径
+            let alpha = 1; // 線のalpha値
+            let count = 1;
+            let tick_count = 0; // flame数
+            const speed = 2; // 波紋のSPEED 1 - 10;
+            const strokeThickness = 3; // 枠線の太さ
+            const strokeColorR = 200; // 枠線の色 赤
+            const strokeColorG = 200; // 枠線の色 緑
+            const strokeColorB = 200; // 枠線の色 青
 
+            const space = 20; // 線の間の感覚
+            const alpha_default = 0.007; // 薄くなっていく単位（ライフ）
 
-            // circle.setTransform(circle.x, circle.y, 0.01, 0.01);
-
-            //stage.addChild (circle);
-            //stage.update ();
-
-            let radius = 1;
-            let alpha = 1;
-            let count = 0;
-            let tick_count = 0;
-            let speed = 2;
-
-            const above = 20;
-            const alpha_default = 0.008;
-
-            const circleArray = [];
-
+            let circleArray = [];
             function tick (event) {
-                tick_count += 1;
+                tick_count++;
 
-                if (tick_count % speed === 1) {
+                // スピード調整
+                if (speed !== 1 && tick_count % speed !== 1) {
                     return;
                 }
 
-                count += 1;
-                radius += 1;
-                alpha -= alpha_default;
-
-                if (count % above === 1) {
-                    // Create Circle
+                // Create Circle Particle
+                if (count % space === 1) {
                     const circle = new createjs.Shape ();
 
                     circle.x = stage.canvas.width / 2;
                     circle.y = stage.canvas.height / 2;
+                    circle.alpha = 1;
 
-                    //
                     circleArray.push (circle);
+
                     stage.addChild (circle);
                 }
 
+                // Update Animate
                 for (let i = 0; i < circleArray.length; i++) {
                     const circle = circleArray[i];
 
-                    let size = radius - (above * i);
-                    let al = alpha + (alpha_default * above) * i;
+                    if (circle) {
+                        const size = radius - (space * i); // 線と線のスペースの調整
+                        const alpha_calc = alpha + (alpha_default * space) * i;
 
-                    circle.graphics.clear ()
-                        .beginStroke ('rgba(25,25,25,' + al + ')')
-                        .setStrokeStyle (1)
-                        .drawCircle (0, 0, size);
+                        // 透明になった線は削除する
+                        if (alpha_calc < 0) {
+                            circleArray[i] = void 0;
+                            stage.removeChild (circle);
+                            continue;
+                        }
 
-                    if (al < 0) {
-
+                        circle.graphics.clear ()
+                            .beginStroke (`rgba(${strokeColorR},${strokeColorG},${strokeColorB},${alpha_calc})`)
+                            .beginFill ('rgba(0,0,0,0)')
+                            .setStrokeStyle (strokeThickness)
+                            .drawCircle (0, 0, size);
                     }
                 }
 
+                radius++;
+                count++;
+
+                // 薄くする
+                alpha = alpha - alpha_default;
 
                 stage.update (event);
             }
@@ -78,8 +84,49 @@
 
         }
     </script>
+    <style>
+        html,
+        body {
+            width  : 100%;
+            height : 100%;
+        }
+
+        main {
+            position : relative;
+            width    : 100%;
+            height   : 100%;
+        }
+
+        div {
+            position  : absolute;
+            top       : 50%;
+            left      : 50%;
+            transform : translate(-50%, -50%);
+        }
+
+        img {
+            position  : absolute;
+            top       : 50%;
+            left      : 50%;
+            transform : translate(-50%, -50%);
+        }
+
+        canvas {
+            position  : absolute;
+            top       : 50%;
+            left      : 50%;
+            transform : translate(-50%, -50%);
+        }
+
+    </style>
 </head>
 <body>
-<canvas id="myCanvas" width="980" height="400"></canvas>
+<main>
+    <div>
+        <img src="images/neko.jpg" width="640" height="400">
+        <canvas id="myCanvas" width="640" height="400"></canvas>
+    </div>
+</main>
+
 </body>
 </html>
