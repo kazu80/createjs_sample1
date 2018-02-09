@@ -11,6 +11,50 @@
         function init () {
             // 初期化
             const stage = new createjs.Stage ('myCanvas');
+
+            createjs.Ticker.setFPS (60);
+            createjs.Ticker.addEventListener ('tick', tick);
+
+            /*
+            const obj = new createjs.Shape();
+            stage.addChild(obj); // 表示リストに追加
+
+            obj.graphics.beginStroke("rgba(255,150,150,1)");
+            obj.graphics.setStrokeStyle (5);
+            */
+
+            const speed = 5;
+            let count = 0;
+            let cnt = 0;
+
+            function tick (event) {
+                count += speed;
+                cnt += 1;
+
+                const angle = 0.02 * count;
+
+                let x = (stage.canvas.width / 2);
+                let y = (stage.canvas.height / 2);
+
+                //x += (1 + angle) * Math.cos(angle * 0.25);
+                //y += (1 + angle) * Math.sin(angle * 0.25);
+                x += (1 + angle) * Math.cos (angle * 0.15);
+                y += (1 + angle) * Math.sin (angle * 0.15);
+                //x += (1 + angle) * Math.cos(angle * 0.05);
+                //y += (1 + angle) * Math.sin(angle * 0.05);
+
+                /*
+                obj.graphics.lineTo(x, y);
+                */
+
+                // ボールを作成
+                const ball = new createjs.Shape ();
+                const r = 0.5 * (cnt * 0.01);
+                ball.graphics.beginFill ('rgba(0, 0, 0, 1)').drawCircle (x, y, r);
+                stage.addChild (ball);
+
+                stage.update (event);
+            }
         }
     </script>
     <style>
