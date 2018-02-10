@@ -15,6 +15,7 @@
             createjs.Ticker.setFPS (60);
             createjs.Ticker.addEventListener ('tick', tick);
 
+            /*
             const obj = new createjs.Shape();
             stage.addChild(obj); // 表示リストに追加
 
@@ -26,6 +27,7 @@
 
             obj2.graphics.beginStroke ('rgba(150,150,255,1)');
             obj2.graphics.setStrokeStyle (5);
+            */
 
             const speed = 5;
             let count = 0;
@@ -34,7 +36,11 @@
 
             function tick (event) {
                 count += speed;
-                count2 += speed + 0.78;
+                count2 += speed + 0.265;
+
+                count += 5;
+                count2 += 5.265;
+
                 cnt += 1;
 
                 const angle = 0.02 * count;
@@ -47,14 +53,24 @@
 
                 //x += (1 + angle) * Math.cos(angle * 0.25);
                 //y += (1 + angle) * Math.sin(angle * 0.25);
-                x += (1 + angle) * Math.cos (angle * 0.15);
-                y += (1 + angle) * Math.sin (angle * 0.15);
 
-                x2 += (1 + angle2) * Math.cos (angle2 * 0.13);
-                y2 += (1 + angle2) * Math.sin (angle2 * 0.13);
+                x += (1 + angle) * Math.cos (angle * 0.20);
+                y += (1 + angle) * Math.sin (angle * 0.20);
+                x2 += (1 + angle2) * Math.cos (angle2 * 0.19);
+                y2 += (1 + angle2) * Math.sin (angle2 * 0.19);
 
+                /*
                 obj.graphics.lineTo(x, y);
                 obj2.graphics.lineTo (x2, y2);
+                */
+
+                const obj = new createjs.Shape ();
+                stage.addChild (obj); // 表示リストに追加
+
+                obj.graphics.beginStroke ('rgba(50, 50, 50, 1)');
+                obj.graphics.setStrokeStyle (4);
+                obj.graphics.moveTo (x, y);
+                obj.graphics.lineTo (x2, y2);
 
                 // ボールを作成
                 /*
