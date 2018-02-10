@@ -15,43 +15,54 @@
             createjs.Ticker.setFPS (60);
             createjs.Ticker.addEventListener ('tick', tick);
 
-            /*
             const obj = new createjs.Shape();
             stage.addChild(obj); // 表示リストに追加
 
             obj.graphics.beginStroke("rgba(255,150,150,1)");
             obj.graphics.setStrokeStyle (5);
-            */
+
+            const obj2 = new createjs.Shape ();
+            stage.addChild (obj2); // 表示リストに追加
+
+            obj2.graphics.beginStroke ('rgba(150,150,255,1)');
+            obj2.graphics.setStrokeStyle (5);
 
             const speed = 5;
             let count = 0;
+            let count2 = 0;
             let cnt = 0;
 
             function tick (event) {
                 count += speed;
+                count2 += speed + 0.78;
                 cnt += 1;
 
                 const angle = 0.02 * count;
+                const angle2 = 0.02 * count2;
 
                 let x = (stage.canvas.width / 2);
                 let y = (stage.canvas.height / 2);
+                let x2 = (stage.canvas.width / 2);
+                let y2 = (stage.canvas.height / 2);
 
                 //x += (1 + angle) * Math.cos(angle * 0.25);
                 //y += (1 + angle) * Math.sin(angle * 0.25);
                 x += (1 + angle) * Math.cos (angle * 0.15);
                 y += (1 + angle) * Math.sin (angle * 0.15);
-                //x += (1 + angle) * Math.cos(angle * 0.05);
-                //y += (1 + angle) * Math.sin(angle * 0.05);
 
-                /*
+                x2 += (1 + angle2) * Math.cos (angle2 * 0.13);
+                y2 += (1 + angle2) * Math.sin (angle2 * 0.13);
+
                 obj.graphics.lineTo(x, y);
-                */
+                obj2.graphics.lineTo (x2, y2);
 
                 // ボールを作成
+                /*
                 const ball = new createjs.Shape ();
                 const r = 0.5 * (cnt * 0.01);
                 ball.graphics.beginFill ('rgba(0, 0, 0, 1)').drawCircle (x, y, r);
                 stage.addChild (ball);
+                */
 
                 stage.update (event);
             }
