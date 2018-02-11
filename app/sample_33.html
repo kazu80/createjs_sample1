@@ -15,19 +15,15 @@
             createjs.Ticker.setFPS (60);
             createjs.Ticker.addEventListener ('tick', tick);
 
-            /*
-            const obj = new createjs.Shape();
-            stage.addChild(obj); // 表示リストに追加
+            const obj1 = new createjs.Shape ();
+            stage.addChild (obj1); // 表示リストに追加
 
-            obj.graphics.beginStroke("rgba(255,150,150,1)");
-            obj.graphics.setStrokeStyle (5);
+            obj1.graphics.beginStroke ('rgba(50,50,50,1)');
 
             const obj2 = new createjs.Shape ();
             stage.addChild (obj2); // 表示リストに追加
 
-            obj2.graphics.beginStroke ('rgba(150,150,255,1)');
-            obj2.graphics.setStrokeStyle (5);
-            */
+            obj2.graphics.beginStroke ('rgba(50,50,50,1)');
 
             const speed = 5;
             let count = 0;
@@ -59,16 +55,14 @@
                 x2 += (1 + angle2) * Math.cos (angle2 * 0.19);
                 y2 += (1 + angle2) * Math.sin (angle2 * 0.19);
 
-                /*
-                obj.graphics.lineTo(x, y);
+                obj1.graphics.lineTo (x, y);
                 obj2.graphics.lineTo (x2, y2);
-                */
 
                 const obj = new createjs.Shape ();
                 stage.addChild (obj); // 表示リストに追加
 
                 obj.graphics.beginStroke ('rgba(50, 50, 50, 1)');
-                obj.graphics.setStrokeStyle (4);
+                obj.graphics.setStrokeStyle (8);
                 obj.graphics.moveTo (x, y);
                 obj.graphics.lineTo (x2, y2);
 
