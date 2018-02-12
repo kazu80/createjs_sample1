@@ -29,6 +29,7 @@
             let count = 0;
             let count2 = 0;
             let cnt = 0;
+            let alpha = 1;
 
             function tick (event) {
                 count += speed;
@@ -38,6 +39,8 @@
                 count2 += 5.265;
 
                 cnt += 1;
+
+                alpha -= 0.0005;
 
                 const angle = 0.02 * count;
                 const angle2 = 0.02 * count2;
@@ -61,7 +64,7 @@
                 const obj = new createjs.Shape ();
                 stage.addChild (obj); // 表示リストに追加
 
-                obj.graphics.beginStroke ('rgba(50, 50, 50, 1)');
+                obj.graphics.beginStroke (`rgba(50, 50, 50, ${alpha})`);
                 obj.graphics.setStrokeStyle (8);
                 obj.graphics.moveTo (x, y);
                 obj.graphics.lineTo (x2, y2);
