@@ -32,6 +32,11 @@
             let alpha = 1;
 
             function tick (event) {
+
+                if (count > 11000) {
+                    return;
+                }
+
                 count += speed;
                 count2 += speed + 0.265;
 
@@ -65,7 +70,7 @@
                 stage.addChild (obj); // 表示リストに追加
 
                 obj.graphics.beginStroke (`rgba(50, 50, 50, ${alpha})`);
-                obj.graphics.setStrokeStyle (8);
+                obj.graphics.setStrokeStyle (16);
                 obj.graphics.moveTo (x, y);
                 obj.graphics.lineTo (x2, y2);
 
