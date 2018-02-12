@@ -21,6 +21,11 @@
             const obj1 = new createjs.Shape ();
             container.addChild (obj1); // 表示リストに追加
 
+            container.x = 320;
+            container.y = 200;
+            container.regX = 320;
+            container.regY = 200;
+
             obj1.graphics.beginStroke ('rgba(50,50,50,1)');
 
             const obj2 = new createjs.Shape ();
@@ -34,64 +39,48 @@
             let cnt = 0;
             let alpha = 1;
 
-            // Rotate
-            /*
-            createjs.Tween.get (container, {loop: true})
-                .to({
-                        rotation: 90
-                    });
-                    */
-
             function tick (event) {
 
-                if (count > 11000) {
-                    return;
+                if (count < 11000) {
+                    count += speed;
+                    count2 += speed + 0.265;
+
+                    count += 5;
+                    count2 += 5.265;
+
+                    cnt += 1;
+
+                    alpha -= 0.0005;
+
+                    const angle = 0.02 * count;
+                    const angle2 = 0.02 * count2;
+
+                    let x = (stage.canvas.width / 2);
+                    let y = (stage.canvas.height / 2);
+                    let x2 = (stage.canvas.width / 2);
+                    let y2 = (stage.canvas.height / 2);
+
+                    //x += (1 + angle) * Math.cos(angle * 0.25);
+                    //y += (1 + angle) * Math.sin(angle * 0.25);
+
+                    x += (1 + angle) * Math.cos (angle * 0.20);
+                    y += (1 + angle) * Math.sin (angle * 0.20);
+                    x2 += (1 + angle2) * Math.cos (angle2 * 0.19);
+                    y2 += (1 + angle2) * Math.sin (angle2 * 0.19);
+
+                    obj1.graphics.lineTo (x, y);
+                    obj2.graphics.lineTo (x2, y2);
+
+                    const obj = new createjs.Shape ();
+                    container.addChild (obj); // 表示リストに追加
+
+                    obj.graphics.beginStroke (`rgba(50, 50, 50, ${alpha})`);
+                    obj.graphics.setStrokeStyle (16);
+                    obj.graphics.moveTo (x, y);
+                    obj.graphics.lineTo (x2, y2);
                 }
 
-                count += speed;
-                count2 += speed + 0.265;
-
-                count += 5;
-                count2 += 5.265;
-
-                cnt += 1;
-
-                alpha -= 0.0005;
-
-                const angle = 0.02 * count;
-                const angle2 = 0.02 * count2;
-
-                let x = (stage.canvas.width / 2);
-                let y = (stage.canvas.height / 2);
-                let x2 = (stage.canvas.width / 2);
-                let y2 = (stage.canvas.height / 2);
-
-                //x += (1 + angle) * Math.cos(angle * 0.25);
-                //y += (1 + angle) * Math.sin(angle * 0.25);
-
-                x += (1 + angle) * Math.cos (angle * 0.20);
-                y += (1 + angle) * Math.sin (angle * 0.20);
-                x2 += (1 + angle2) * Math.cos (angle2 * 0.19);
-                y2 += (1 + angle2) * Math.sin (angle2 * 0.19);
-
-                obj1.graphics.lineTo (x, y);
-                obj2.graphics.lineTo (x2, y2);
-
-                const obj = new createjs.Shape ();
-                container.addChild (obj); // 表示リストに追加
-
-                obj.graphics.beginStroke (`rgba(50, 50, 50, ${alpha})`);
-                obj.graphics.setStrokeStyle (16);
-                obj.graphics.moveTo (x, y);
-                obj.graphics.lineTo (x2, y2);
-
-                // ボールを作成
-                /*
-                const ball = new createjs.Shape ();
-                const r = 0.5 * (cnt * 0.01);
-                ball.graphics.beginFill ('rgba(0, 0, 0, 1)').drawCircle (x, y, r);
-                stage.addChild (ball);
-                */
+                container.rotation -= 1;
 
                 stage.update (event);
             }
