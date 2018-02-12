@@ -11,17 +11,20 @@
         function init () {
             // 初期化
             const stage = new createjs.Stage ('myCanvas');
+            const container = new createjs.Container ();
+
+            stage.addChild (container);
 
             createjs.Ticker.setFPS (60);
             createjs.Ticker.addEventListener ('tick', tick);
 
             const obj1 = new createjs.Shape ();
-            stage.addChild (obj1); // 表示リストに追加
+            container.addChild (obj1); // 表示リストに追加
 
             obj1.graphics.beginStroke ('rgba(50,50,50,1)');
 
             const obj2 = new createjs.Shape ();
-            stage.addChild (obj2); // 表示リストに追加
+            container.addChild (obj2); // 表示リストに追加
 
             obj2.graphics.beginStroke ('rgba(50,50,50,1)');
 
@@ -30,6 +33,14 @@
             let count2 = 0;
             let cnt = 0;
             let alpha = 1;
+
+            // Rotate
+            /*
+            createjs.Tween.get (container, {loop: true})
+                .to({
+                        rotation: 90
+                    });
+                    */
 
             function tick (event) {
 
@@ -67,7 +78,7 @@
                 obj2.graphics.lineTo (x2, y2);
 
                 const obj = new createjs.Shape ();
-                stage.addChild (obj); // 表示リストに追加
+                container.addChild (obj); // 表示リストに追加
 
                 obj.graphics.beginStroke (`rgba(50, 50, 50, ${alpha})`);
                 obj.graphics.setStrokeStyle (16);
